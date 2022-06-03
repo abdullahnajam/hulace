@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:hulace/screens/customer/customer_homepage.dart';
 import 'package:hulace/screens/customer/customer_profile.dart';
 import '../../utils/constants.dart';
+import 'customer/home_Screen_p2.dart';
 import 'customer/messages.dart';
+import 'customer/screen2.dart';
 
 class CustomerNavBar extends StatefulWidget {
 
@@ -51,6 +53,7 @@ class _BottomNavigationState extends State<CustomerNavBar>{
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: (){
+          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => Screen2()));
 
         },
       ),
