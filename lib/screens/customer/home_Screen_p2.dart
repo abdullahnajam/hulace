@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../utils/constants.dart';
+
 class HomeScreenP extends StatefulWidget {
   const HomeScreenP({Key? key}) : super(key: key);
 
@@ -7,7 +9,6 @@ class HomeScreenP extends StatefulWidget {
   _HomeScreenPState createState() => _HomeScreenPState();
 }
 
-const primaryColor=Color(0xff502e2d);
 
 
 class _HomeScreenPState extends State<HomeScreenP> {

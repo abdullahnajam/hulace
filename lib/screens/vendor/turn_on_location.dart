@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hulace/utils/constants.dart';
 
-import '../vendor_nav.dart';
+import '../navigators/vendor_nav.dart';
 
 class TurnOnLocation extends StatefulWidget {
   const TurnOnLocation({Key? key}) : super(key: key);

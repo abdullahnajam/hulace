@@ -24,7 +24,7 @@ class _GetStartedAuthState extends State<GetStartedAuth> {
             Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height*0.6,
-              child: Image.asset("assets/images/logo.png",width: 250,height: 250,color: primaryColor,),
+              child: Image.asset("assets/images/logo.png",width: 250,height: 250,color: primaryColor),
             ),
             Expanded(
               child:Column(

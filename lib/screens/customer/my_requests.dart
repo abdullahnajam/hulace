@@ -1,32 +1,23 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hulace/screens/navigators/vendor_drawer.dart';
-import 'package:hulace/utils/constants.dart';
 
-import '../navigators/customer_drawer.dart';
+import '../../utils/constants.dart';
 
-class UserChatList extends StatefulWidget {
-  const UserChatList({Key? key}) : super(key: key);
+class MyRequests extends StatefulWidget {
+  const MyRequests({Key? key}) : super(key: key);
 
   @override
-  _UserChatListState createState() => _UserChatListState();
+  _MyRequestsState createState() => _MyRequestsState();
 }
 
-class _UserChatListState extends State<UserChatList> {
-  final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
-  void _openDrawer () {
-    _drawerKey.currentState!.openDrawer();
-  }
+class _MyRequestsState extends State<MyRequests> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _drawerKey,
-      drawer: VendorDrawer(),
       backgroundColor: secondaryColor,
       body: Column(
         children: [
           Container(
-            height: MediaQuery.of(context).size.height*0.28,
+            height: MediaQuery.of(context).size.height*0.25,
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               color: secondaryColor,
@@ -47,17 +38,12 @@ class _UserChatListState extends State<UserChatList> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      InkWell(
-                        onTap: (){
-                          _openDrawer();
-                        },
-                        child: Image.asset("assets/images/menu.png",color: primaryColor,height: 40,),
-                      ),
+
 
 
                       InkWell(
                         onTap: (){
-                          //Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => UserNotifications()));
+                          Navigator.pop(context);
                         },
                         child: Container(
                           height: 50,
@@ -68,7 +54,7 @@ class _UserChatListState extends State<UserChatList> {
                               elevation: 3,
                               child: CircleAvatar(
                                   backgroundColor: Colors.white,
-                                  child:  Icon(Icons.chat,color: primaryColor,)
+                                  child:  Icon(Icons.arrow_back,color: primaryColor,)
                               )
                           ),
                         ),
@@ -131,7 +117,7 @@ class _UserChatListState extends State<UserChatList> {
                                   width: 0.5,
                                 ),
                               ),
-                              hintText: 'Find Chat',
+                              hintText: 'Find Your Request',
                               // If  you are using latest version of flutter then lable text and hint text shown like this
                               // if you r using flutter less then 1.20.* then maybe this is not working properly
                               floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -153,7 +139,10 @@ class _UserChatListState extends State<UserChatList> {
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
                   color: bgColor,
-                  borderRadius: BorderRadius.circular(20)
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  )
               ),
               child: ListView.builder(
                 padding: EdgeInsets.zero,
@@ -167,38 +156,56 @@ class _UserChatListState extends State<UserChatList> {
                     ),
                     child: Column(
                       children: [
-                        SizedBox(height: 10,),
-                        ListTile(
-                          leading: Container(
-                            margin: EdgeInsets.all(2),
-                            height: 50,
-                            width: 50,
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                    image: AssetImage("assets/images/profile.png",),
-                                    fit: BoxFit.cover
-                                )
-
-                            ),
-
-                          ),
-                          title: Text("Kim Joyce",style: TextStyle(fontWeight: FontWeight.w500),),
-                          subtitle:  Text("Lorem ipsum dolor sit amet",style: TextStyle(fontWeight: FontWeight.w300),),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10,right: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Text("2 min ago",style: TextStyle(fontSize:12,fontWeight: FontWeight.w300),),
-                              SizedBox(height: 5,),
-                              CircleAvatar(
-                                radius: 12,
-                                backgroundColor: primaryColor,
-                                child: Text("2",style: TextStyle(fontSize:12,fontWeight: FontWeight.w300),),
-                              )
+                              Text("2 min ago",style: TextStyle(fontSize:10,fontWeight: FontWeight.w300),),
                             ],
                           ),
                         ),
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text("$loremIpsum $loremIpsum ",textAlign: TextAlign.justify,style: TextStyle(fontWeight: FontWeight.w400),),
+                        ),
                         SizedBox(height: 10,),
+                        Container(
+                            height: MediaQuery.of(context).size.height*0.07,
+                            decoration: BoxDecoration(
+                                color: primaryColor,
+                                borderRadius: BorderRadius.circular(10)
+                            ),
+                            padding: EdgeInsets.all(10),
+                            child:Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Status",style: TextStyle(color: Colors.white),),
+                                    Text("Active",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12,color: Colors.white),)
+                                  ],
+                                ),
+                                VerticalDivider(color: secondaryColor),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Offers",style: TextStyle(color:Colors.white),),
+                                    Text("43",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12,color:Colors.white),)
+                                  ],
+                                ),
+                                VerticalDivider(color: secondaryColor,width: 2,),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Budget",style: TextStyle(color:Colors.white)),
+                                    Text("\$200",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12,color:Colors.white))
+                                  ],
+                                ),
+                              ],
+                            )
+                        ),
                       ],
                     ),
                   );

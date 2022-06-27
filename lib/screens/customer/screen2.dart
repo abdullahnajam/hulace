@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../utils/constants.dart';
+
 class Screen2 extends StatefulWidget {
   const Screen2({Key? key}) : super(key: key);
 
@@ -7,7 +9,6 @@ class Screen2 extends StatefulWidget {
   _Screen2State createState() => _Screen2State();
 }
 
-const primaryColor=Color(0xff502e2d);
 
 
 class _Screen2State extends State<Screen2> {

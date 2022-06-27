@@ -1,4 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:hulace/screens/customer/view_vendor.dart';
+
+import '../../utils/constants.dart';
+import '../navigators/customer_drawer.dart';
 
 class Search extends StatefulWidget {
   const Search({Key? key}) : super(key: key);
@@ -8,15 +14,339 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
+  final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
+  void _openDrawer () {
+    _drawerKey.currentState!.openDrawer();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
+      key: _drawerKey,
+      drawer: CustomerDrawer(),
+      backgroundColor: secondaryColor,
+      body: Column(
+        children: [
+          Container(
+            height: MediaQuery.of(context).size.height*0.28,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: secondaryColor,
+              /*gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.black,
+                      Color(0xff2e2e30),
+                    ],
+                  ),*/
+            ),
+            child: Column(
+              children: [
+                SizedBox(height: 30,),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      InkWell(
+                        onTap: (){
+                          _openDrawer();
+                        },
+                        child: Image.asset("assets/images/menu.png",color: primaryColor,height: 40,),
+                      ),
 
-          ],
-        ),
+
+                      InkWell(
+                        onTap: (){
+                          //Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => UserNotifications()));
+                        },
+                        child: Container(
+                          height: 50,
+                          child: Card(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(50)
+                              ),
+                              elevation: 3,
+                              child: CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  child:  Icon(Icons.location_on_outlined,color: primaryColor,)
+                              )
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                SizedBox(height: 10,),
+                Container(
+                  height: 60,
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)
+                    ),
+                    elevation: 3,
+                    child: Row(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.all(2),
+                          height: 60,
+                          width: 50,
+                          decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.circular(10)
+                            /*borderRadius: BorderRadius.only(
+                              topLeft:Radius.circular(10),
+                              bottomLeft:Radius.circular(10),
+                            )*/
+                          ),
+                          child: Icon(Icons.search,color: secondaryColor,),
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter some text';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(15),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(7.0),
+                                borderSide: BorderSide(
+                                  color: Colors.transparent,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(7.0),
+                                borderSide: BorderSide(
+                                    color: Colors.transparent,
+                                    width: 0.5
+                                ),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(7.0),
+                                borderSide: BorderSide(
+                                  color: Colors.transparent,
+                                  width: 0.5,
+                                ),
+                              ),
+                              hintText: 'Find Vendors',
+                              // If  you are using latest version of flutter then lable text and hint text shown like this
+                              // if you r using flutter less then 1.20.* then maybe this is not working properly
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            //height: MediaQuery.of(context).size.height*0.65,
+            //width: MediaQuery.of(context).size.width,
+            child: Container(
+              margin: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                  color: bgColor,
+
+                  borderRadius: BorderRadius.circular(20)
+              ),
+              child: ListView(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                children: [
+
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Top Vendors",style: TextStyle(fontSize:18,color: primaryColor),),
+                        SizedBox(height: 10,),
+                        Container(
+                          height: 120,
+                          child: ListView.builder(
+                            itemCount: 10,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (BuildContext context,int index){
+                              return InkWell(
+                                onTap: (){
+                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ViewVendor()));
+
+                                },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 10),
+                                    child: Container(
+                                      width: 180,
+                                      child: Card(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    margin: EdgeInsets.all(2),
+                                                    height: 50,
+                                                    width: 50,
+                                                    decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(10),
+                                                        image: DecorationImage(
+                                                            image: AssetImage("assets/images/profile.png",),
+                                                            fit: BoxFit.cover
+                                                        )
+
+                                                    ),
+
+                                                  ),
+                                                  SizedBox(width: 7,),
+                                                  Container(
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text("Kim Joyce",style: TextStyle(fontWeight: FontWeight.w500),),
+                                                        Text("45 Jobs",style: TextStyle(fontWeight: FontWeight.w300),),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+
+                                             Column(
+                                               crossAxisAlignment: CrossAxisAlignment.start,
+                                               children: [
+                                                 Row(
+                                                   children: [
+                                                     RatingBar(
+                                                       initialRating: 5,
+                                                       direction: Axis.horizontal,
+                                                       allowHalfRating: true,
+                                                       itemCount: 5,
+                                                       itemSize: 15,
+                                                       ratingWidget: RatingWidget(
+                                                         full: Icon(Icons.star,size: 15,color: Colors.yellow,),
+                                                         half: Icon(Icons.star_half,size: 15,),
+                                                         empty: Icon(Icons.star_border,size: 15,),
+                                                       ),
+                                                       itemPadding: EdgeInsets.symmetric(horizontal: 0),
+                                                       onRatingUpdate: (rating) {
+                                                         print(rating);
+                                                       },
+                                                     ),
+                                                     Text("(5)",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12),)
+                                                   ],
+                                                 ),
+                                                 SizedBox(height: 3,),
+                                                 Text("Starting from \$200",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12),),
+                                                 SizedBox(height: 7,),
+                                               ],
+                                             )
+
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  )
+                              );
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10,right: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Category Events",style: TextStyle(fontSize:18,fontWeight: FontWeight.w500),),
+
+                      ],
+                    ),
+                  ),
+
+                  Expanded(
+                    child: ListView(
+                      padding: EdgeInsets.only(top: 10),
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      children: [
+                        Card(
+                          margin: EdgeInsets.only(bottom: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              SizedBox(height: 10,),
+                              ListTile(
+                                leading: Container(
+                                  margin: EdgeInsets.all(2),
+                                  padding: EdgeInsets.all(7),
+                                  height: 50,
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                      color: primaryColor,
+                                      borderRadius: BorderRadius.circular(10)
+                                    /*borderRadius: BorderRadius.only(
+                                        topLeft:Radius.circular(10),
+                                        bottomLeft:Radius.circular(10),
+                                      )*/
+                                  ),
+                                  child: Image.asset("assets/images/sports.png"),
+                                ),
+                                title: Text("Sports"),
+                              ),
+                              SizedBox(height: 10,),
+                            ],
+                          ),
+                        ),
+                        Card(
+                          margin: EdgeInsets.only(bottom: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              SizedBox(height: 10,),
+                              ListTile(
+                                leading: Container(
+                                  margin: EdgeInsets.all(2),
+                                  padding: EdgeInsets.all(7),
+                                  height: 50,
+                                  width: 50,
+                                  decoration: BoxDecoration(
+                                      color: primaryColor,
+                                      borderRadius: BorderRadius.circular(10)
+                                    /*borderRadius: BorderRadius.only(
+                                        topLeft:Radius.circular(10),
+                                        bottomLeft:Radius.circular(10),
+                                      )*/
+                                  ),
+                                  child: Image.asset("assets/images/rings.png"),
+                                ),
+                                title: Text("Wedding"),
+                              ),
+                              SizedBox(height: 10,),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          )
+        ],
       ),
     );
   }

@@ -38,6 +38,12 @@ dependencies:
   animated_bottom_navigation_bar: ^0.3.3
   step_progress_indicator: ^1.0.2
   water_drop_nav_bar: ^2.2.0+2
+  flutter_snake_navigationbar: ^0.6.1
+  fluttericon: ^2.0.0
+  flutter_rating_bar: ^4.0.1
+  dotted_border: ^2.0.0+2
+  date_picker_timeline: ^1.2.3
+  introduction_screen: ^3.0.2
 
 dev_dependencies:
   flutter_test:

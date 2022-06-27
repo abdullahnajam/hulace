@@ -1,18 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hulace/screens/navigators/vendor_drawer.dart';
-import 'package:hulace/utils/constants.dart';
 
-import '../navigators/customer_drawer.dart';
+import '../../utils/constants.dart';
 
-class UserChatList extends StatefulWidget {
-  const UserChatList({Key? key}) : super(key: key);
+class MyPackages extends StatefulWidget {
+  const MyPackages({Key? key}) : super(key: key);
 
   @override
-  _UserChatListState createState() => _UserChatListState();
+  _MyPackagesState createState() => _MyPackagesState();
 }
 
-class _UserChatListState extends State<UserChatList> {
+class _MyPackagesState extends State<MyPackages> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   void _openDrawer () {
     _drawerKey.currentState!.openDrawer();
@@ -26,7 +25,7 @@ class _UserChatListState extends State<UserChatList> {
       body: Column(
         children: [
           Container(
-            height: MediaQuery.of(context).size.height*0.28,
+            height: MediaQuery.of(context).size.height*0.25,
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               color: secondaryColor,
@@ -47,31 +46,14 @@ class _UserChatListState extends State<UserChatList> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+
+
+
                       InkWell(
                         onTap: (){
                           _openDrawer();
                         },
                         child: Image.asset("assets/images/menu.png",color: primaryColor,height: 40,),
-                      ),
-
-
-                      InkWell(
-                        onTap: (){
-                          //Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => UserNotifications()));
-                        },
-                        child: Container(
-                          height: 50,
-                          child: Card(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(50)
-                              ),
-                              elevation: 3,
-                              child: CircleAvatar(
-                                  backgroundColor: Colors.white,
-                                  child:  Icon(Icons.chat,color: primaryColor,)
-                              )
-                          ),
-                        ),
                       ),
                     ],
                   ),
@@ -131,7 +113,7 @@ class _UserChatListState extends State<UserChatList> {
                                   width: 0.5,
                                 ),
                               ),
-                              hintText: 'Find Chat',
+                              hintText: 'Find Your Package',
                               // If  you are using latest version of flutter then lable text and hint text shown like this
                               // if you r using flutter less then 1.20.* then maybe this is not working properly
                               floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -153,7 +135,10 @@ class _UserChatListState extends State<UserChatList> {
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
                   color: bgColor,
-                  borderRadius: BorderRadius.circular(20)
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  )
               ),
               child: ListView.builder(
                 padding: EdgeInsets.zero,
@@ -166,39 +151,47 @@ class _UserChatListState extends State<UserChatList> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 10,),
-                        ListTile(
-                          leading: Container(
-                            margin: EdgeInsets.all(2),
-                            height: 50,
-                            width: 50,
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                    image: AssetImage("assets/images/profile.png",),
-                                    fit: BoxFit.cover
-                                )
-
-                            ),
+                        Container(
+                          margin: EdgeInsets.all(2),
+                          height: MediaQuery.of(context).size.height*0.2,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10),
+                              ),
+                              image: DecorationImage(
+                                  image: AssetImage("assets/images/event1.png",),
+                                  fit: BoxFit.cover
+                              )
 
                           ),
-                          title: Text("Kim Joyce",style: TextStyle(fontWeight: FontWeight.w500),),
-                          subtitle:  Text("Lorem ipsum dolor sit amet",style: TextStyle(fontWeight: FontWeight.w300),),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10,right: 5,top: 5),
+                          child: Text("Gig Title",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 15),),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text("Here will be the gig description provided by vendor",textAlign: TextAlign.justify,style: TextStyle(fontWeight: FontWeight.w400),),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Divider(color: Colors.grey,),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("2 min ago",style: TextStyle(fontSize:12,fontWeight: FontWeight.w300),),
-                              SizedBox(height: 5,),
-                              CircleAvatar(
-                                radius: 12,
-                                backgroundColor: primaryColor,
-                                child: Text("2",style: TextStyle(fontSize:12,fontWeight: FontWeight.w300),),
-                              )
+                              Text("Category",style: TextStyle(fontWeight: FontWeight.w500),),
+                              Text("\$200",style: TextStyle(fontWeight: FontWeight.w500),),
                             ],
                           ),
                         ),
-                        SizedBox(height: 10,),
                       ],
                     ),
                   );

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hulace/screens/customer_nav.dart';
+import 'package:hulace/screens/navigators/customer_nav.dart';
 import 'package:hulace/screens/get_started/choose_interests.dart';
 
 import '../../utils/constants.dart';

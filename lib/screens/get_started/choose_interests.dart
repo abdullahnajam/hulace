@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hulace/screens/customer/customer_homepage.dart';
-import 'package:hulace/screens/customer_nav.dart';
+import 'package:hulace/screens/navigators/customer_nav.dart';
 
 import '../../utils/constants.dart';
 

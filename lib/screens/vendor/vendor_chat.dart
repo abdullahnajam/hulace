@@ -1,18 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hulace/screens/navigators/vendor_drawer.dart';
 import 'package:hulace/utils/constants.dart';
 
 import '../navigators/customer_drawer.dart';
 
-class UserChatList extends StatefulWidget {
-  const UserChatList({Key? key}) : super(key: key);
+class VendorChat extends StatefulWidget {
+  const VendorChat({Key? key}) : super(key: key);
 
   @override
-  _UserChatListState createState() => _UserChatListState();
+  _VendorChatState createState() => _VendorChatState();
 }
 
-class _UserChatListState extends State<UserChatList> {
+class _VendorChatState extends State<VendorChat> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   void _openDrawer () {
     _drawerKey.currentState!.openDrawer();
@@ -21,7 +20,7 @@ class _UserChatListState extends State<UserChatList> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _drawerKey,
-      drawer: VendorDrawer(),
+      drawer: CustomerDrawer(),
       backgroundColor: secondaryColor,
       body: Column(
         children: [
