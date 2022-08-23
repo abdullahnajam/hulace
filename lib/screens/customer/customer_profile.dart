@@ -1,8 +1,18 @@
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cool_alert/cool_alert.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:hulace/splash.dart';
 import 'package:hulace/utils/constants.dart';
 import 'package:hulace/widgets/custom_appbar.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:sn_progress_dialog/progress_dialog.dart';
 
+import '../../provider/UserDataProvider.dart';
 import '../navigators/customer_drawer.dart';
 
 class CustomerProfile extends StatefulWidget {
@@ -17,8 +27,80 @@ class _CustomerProfileState extends State<CustomerProfile> {
   void _openDrawer () {
     _drawerKey.currentState!.openDrawer();
   }
+  File? imagefile;
+  String photoUrl="";
+  Future uploadImageToFirebase(BuildContext context) async {
+    final ProgressDialog pr = ProgressDialog(context: context);
+    pr.show(max: 100, msg: 'Please Wait',barrierDismissible: false);
+    firebase_storage.Reference firebaseStorageRef = firebase_storage.FirebaseStorage.instance.ref().child('uploads/${DateTime.now().millisecondsSinceEpoch}');
+    firebase_storage.UploadTask uploadTask = firebaseStorageRef.putFile(imagefile!);
+    firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
+    taskSnapshot.ref.getDownloadURL().then((value)async {
+      photoUrl=value;
+      print("value $value");
+      setState(() {
+        final provider = Provider.of<UserDataProvider>(context, listen: false);
+        provider.userData!.profilePic=photoUrl;
+        pr.close();
+      });
+      await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update({
+        "profilePic":photoUrl,
+      }).then((val) {
+      });
+    }).onError((error, stackTrace){
+      pr.close();
+      CoolAlert.show(
+        context: context,
+        type: CoolAlertType.error,
+        text: error.toString(),
+      );
+    });
+  }
+
+  void fileSet(File file){
+    setState(() {
+      if(file!=null){
+        imagefile=file;
+      }
+    });
+    uploadImageToFirebase(context);
+  }
+  Future _chooseGallery() async{
+    await ImagePicker().pickImage(source: ImageSource.gallery).then((value) => fileSet(File(value!.path)));
+
+  }
+  Future _choosecamera() async{
+    await ImagePicker().pickImage(source: ImageSource.camera).then((value) => fileSet(File(value!.path)));
+  }
+  _logoModalBottomSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return Container(
+            child: Wrap(
+              children: <Widget>[
+                ListTile(
+                    leading: const Icon(Icons.cloud_upload),
+                    title: const Text('Upload file'),
+                    onTap: () => {
+                      _chooseGallery()
+                    }),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Take a photo'),
+                  onTap: () => {
+                    _choosecamera()
+                  },
+                ),
+              ],
+            ),
+          );
+        });
+  }
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<UserDataProvider>(context, listen: false);
+
     return Scaffold(
         key: _drawerKey,
         drawer: CustomerDrawer(),
@@ -101,18 +183,33 @@ class _CustomerProfileState extends State<CustomerProfile> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: AssetImage("assets/images/person.png"),
-                      )
+                InkWell(
+                  onTap: (){
+                    _logoModalBottomSheet(context);
+                  },
+                  child: provider.userData!.profilePic==""?Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                        shape: BoxShape.circle,
+
+                    ),
+                    child: Icon(Icons.add,size: 50,),
+                  ):
+                  Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: NetworkImage(provider.userData!.profilePic),
+                        )
+                    ),
                   ),
                 ),
                 SizedBox(height: 5,),
-                Text("William Jones",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
+                Text("${provider.userData!.firstName} ${provider.userData!.lastName}",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
                 SizedBox(height: 10,),
                 Card(
                   elevation: 2,
@@ -120,6 +217,44 @@ class _CustomerProfileState extends State<CustomerProfile> {
                       borderRadius: BorderRadius.circular(10)
                   ),
                   child: ListTile(
+                    onTap: (){
+                      showMaterialModalBottomSheet(
+                        context: context,
+                        builder: (context) => SingleChildScrollView(
+                          controller: ModalScrollController.of(context),
+                          child: Container(
+                            height:  MediaQuery.of(context).size.height*0.5,
+                            child: ListView(
+                              children: [
+                                ListTile(
+                                  onTap: (){
+                                  },
+                                  leading: Icon(Icons.email),
+                                  title: Text("Email",style: TextStyle(fontWeight: FontWeight.w500),),
+                                  subtitle: Text(provider.userData!.email,style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w300,fontSize: 13),),
+                                ),
+                                ListTile(
+                                  onTap: (){
+                                  },
+                                  leading: Icon(Icons.location_on),
+                                  title: Text("Address",style: TextStyle(fontWeight: FontWeight.w500),),
+                                  subtitle: Text(provider.userData!.location,style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w300,fontSize: 13),),
+                                ),
+                                ListTile(
+                                  onTap: (){
+                                  },
+                                  leading: Icon(Icons.person),
+                                  title: Text("Age",style: TextStyle(fontWeight: FontWeight.w500),),
+                                  subtitle: Text(provider.userData!.age,style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w300,fontSize: 13),),
+                                ),
+
+
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                     leading: Icon(Icons.person,color: primaryColor,),
                     title: Text("Personal Info"),
                     trailing: Icon(Icons.arrow_forward_ios_sharp,color: primaryColor,size: 15,),
@@ -145,6 +280,9 @@ class _CustomerProfileState extends State<CustomerProfile> {
                       borderRadius: BorderRadius.circular(10)
                   ),
                   child: ListTile(
+                    onTap: (){
+                      share();
+                    },
                     leading: Icon(Icons.reply,color: primaryColor,),
                     title: Text("Refer a friend"),
                     trailing: Icon(Icons.arrow_forward_ios_sharp,color: primaryColor,size: 15,),
@@ -200,6 +338,26 @@ class _CustomerProfileState extends State<CustomerProfile> {
                       ),
                     )
                 ),
+                SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: (){
+                        context.read<UserDataProvider>().increase();
+                      },
+                      icon: Icon(Icons.add),
+                    ),
+                    Text(context.watch<UserDataProvider>().count.toString()),
+                    IconButton(
+                      onPressed: (){
+                        context.read<UserDataProvider>().decrease();
+                      },
+                      icon: Icon(Icons.remove),
+                    ),
+                  ],
+                )
 
 
 

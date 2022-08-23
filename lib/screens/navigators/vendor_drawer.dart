@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hulace/screens/customer/create_event.dart';
@@ -11,6 +12,7 @@ import 'package:hulace/screens/vendor/vprofile.dart';
 import '../../utils/constants.dart';
 import '../../utils/rate_us.dart';
 import '../customer/my_requests.dart';
+import '../get_started/getstarted_auth.dart';
 
 class VendorDrawer extends StatefulWidget {
   const VendorDrawer({Key? key}) : super(key: key);
@@ -134,14 +136,7 @@ class _VendorDrawerState extends State<VendorDrawer> {
                   leading: Icon(Icons.assignment),
                   title: Text("My Packages"),
                 ),
-                ListTile(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => MyOrders()));
 
-                  },
-                  leading: Icon(Icons.shopping_cart_outlined),
-                  title: Text("My Orders"),
-                ),
                 ListTile(
                   onTap: (){
                     Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => Proposals()));
@@ -183,8 +178,11 @@ class _VendorDrawerState extends State<VendorDrawer> {
                   title: Text("Contact Us"),
                 ),
                 ListTile(
-                  onTap: (){
+                  onTap: ()async{
+                    await FirebaseAuth.instance.signOut().then((value){
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => GetStartedAuth()));
 
+                    });
                   },
                   leading: Icon(Icons.logout),
                   title: Text("Logout"),

@@ -35,7 +35,7 @@ class _VendorNavBarState extends State<VendorNavBar> {
     _children = [
       Jobs(),
       Orders(),
-      VendorChat(),
+      ChatList(),
       VendorProfile()
 
 

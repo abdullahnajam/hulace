@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hulace/screens/auth/register.dart';
-import 'package:hulace/screens/auth/vendor_register.dart';
+import 'package:hulace/screens/auth/vendor_complete.dart';
 import 'package:hulace/utils/constants.dart';
 
 class RegisterAs extends StatefulWidget {
@@ -32,7 +32,7 @@ class _RegisterAsState extends State<RegisterAs> {
                 children: [
                   InkWell(
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => Register()));
+                      Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => Register("Customer")));
 
 
                     },
@@ -50,7 +50,7 @@ class _RegisterAsState extends State<RegisterAs> {
                   SizedBox(height: 20,),
                   InkWell(
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RegisterVendor()));
+                      Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => Register("Vendor")));
 
 
                     },

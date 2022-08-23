@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "770328014010",
+    "project_id": "hulace",
+    "storage_bucket": "hulace.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:770328014010:android:db05323969b88a839ae683",
+        "android_client_info": {
+          "package_name": "com.event.hulance.hulace"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "770328014010-mpsor7jc4a14sa97u7oqk74t4cv6ieln.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.event.hulance.hulace",
+            "certificate_hash": "10078683f7dcd4cd8d017bbfa5552a12e0391294"
+          }
+        },
+        {
+          "client_id": "770328014010-8bugg0dto5jlb9ei7nhaqpujbdugkodr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDw9E1VMawXaQX82ebrdkAun_zkvQ5VjQg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "770328014010-8bugg0dto5jlb9ei7nhaqpujbdugkodr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

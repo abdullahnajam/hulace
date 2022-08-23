@@ -29,7 +29,7 @@ class _BottomNavigationState extends State<CustomerNavBar>{
     _children = [
       CustomerHomepage(),
       Search(),
-      UserChatList(),
+      ChatList(),
       CustomerProfile(),
 
 

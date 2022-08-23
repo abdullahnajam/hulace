@@ -1,8 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hulace/screens/navigators/vendor_drawer.dart';
+import 'package:hulace/screens/vendor/vendor_order_detail.dart';
 
+import '../../model/order_model.dart';
+import '../../model/package_model.dart';
+import '../../model/users.dart';
+import '../../utils/apis.dart';
 import '../../utils/constants.dart';
+import '../../widgets/profile_image.dart';
+import '../customer/order_detail.dart';
 
 class Orders extends StatefulWidget {
   const Orders({Key? key}) : super(key: key);
@@ -131,90 +140,158 @@ class _OrdersState extends State<Orders> {
             //height: MediaQuery.of(context).size.height*0.65,
             //width: MediaQuery.of(context).size.width,
             child: Container(
-              margin: EdgeInsets.all(10),
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                  color: bgColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  )
-              ),
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: 5,
-                itemBuilder: (BuildContext context,int index){
-                  return Card(
-                    margin: EdgeInsets.only(bottom: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 5,right: 5,top: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.all(2),
-                                    height: 50,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        image: DecorationImage(
-                                            image: AssetImage("assets/images/profile.png",),
-                                            fit: BoxFit.cover
-                                        )
+                margin: EdgeInsets.all(10),
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    )
+                ),
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance.collection('orders')
+                      .where("vendorId",isEqualTo: FirebaseAuth.instance.currentUser!.uid).snapshots(),
+                  builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('Something went wrong');
+                    }
 
-                                    ),
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
 
+                    if (snapshot.data!.size==0) {
+                      return Center(
+                        child: Text("No Orders"),
+                      );
+                    }
+
+                    return ListView(
+                      padding: EdgeInsets.only(top: 10),
+
+                      shrinkWrap: true,
+                      children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                        Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                        OrderModel model=OrderModel.fromMap(data,document.reference.id);
+                        return InkWell(
+                          onTap: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => OrderDetail(model,"Vendor")));
+
+                          },
+                          child: Card(
+                            margin: EdgeInsets.only(bottom: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 5,right: 5,top: 5),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      FutureBuilder<UserModel>(
+                                          future: getUserData(model.vendorId),
+                                          builder: (context, AsyncSnapshot<UserModel> snapshot) {
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                              return Container(
+                                                  child: CircularProgressIndicator()
+                                              );
+                                            }
+                                            else {
+                                              if (snapshot.hasError) {
+                                                print("error ${snapshot.error}");
+                                                return Center(
+                                                  child: Text("error ${snapshot.error}"),
+                                                );
+                                              }
+
+
+                                              else {
+                                                return  Row(
+                                                  children: [
+                                                    ProfilePicture(snapshot.data!.profilePic),
+                                                    SizedBox(width: 7,),
+                                                    Container(
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text("${snapshot.data!.firstName} ${snapshot.data!.lastName}",style: TextStyle(fontWeight: FontWeight.w500),),
+                                                          Text(model.category,style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12),),
+                                                        ],
+                                                      ),
+                                                    )
+                                                  ],
+                                                );
+
+                                              }
+                                            }
+                                          }
+                                      ),
+
+                                      Text(model.status,style: TextStyle(color: primaryColor,fontWeight: FontWeight.bold,fontSize: 12),)
+                                    ],
                                   ),
-                                  SizedBox(width: 7,),
-                                  Container(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text("Kim Joyce",style: TextStyle(fontWeight: FontWeight.w500),),
-                                        Text("Category",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12),),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                              Text("PENDING",style: TextStyle(color: primaryColor,fontWeight: FontWeight.bold,fontSize: 12),)
-                            ],
+                                ),
+                                FutureBuilder<PackageModel>(
+                                    future: getPackageData(model.packageId),
+                                    builder: (context, AsyncSnapshot<PackageModel> snapshot) {
+                                      if (snapshot.connectionState == ConnectionState.waiting) {
+                                        return Container(
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Text("-",textAlign: TextAlign.justify,style: TextStyle(fontWeight: FontWeight.w400),),
+                                            )
+                                        );
+                                      }
+                                      else {
+                                        if (snapshot.hasError) {
+                                          print("error ${snapshot.error}");
+                                          return Center(
+                                            child: Text("error ${snapshot.error}"),
+                                          );
+                                        }
+
+
+                                        else {
+                                          return Padding(
+                                            padding: const EdgeInsets.all(10),
+                                            child: Text(snapshot.data!.title,textAlign: TextAlign.justify,style: TextStyle(fontWeight: FontWeight.w400),),
+                                          );
+
+                                        }
+                                      }
+                                    }
+                                ),
+
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Divider(color: Colors.grey,),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text("${model.date} ${model.time}",style: TextStyle(fontWeight: FontWeight.w500),),
+                                      Text("KM${model.budget}",style: TextStyle(fontWeight: FontWeight.w500),),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text("Here will be the gig description provided by vendor",textAlign: TextAlign.justify,style: TextStyle(fontWeight: FontWeight.w400),),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Divider(color: Colors.grey,),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("6/6/2022",style: TextStyle(fontWeight: FontWeight.w500),),
-                              Text("\$200",style: TextStyle(fontWeight: FontWeight.w500),),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                )
             ),
-          )
+          ),
         ],
       ),
     );

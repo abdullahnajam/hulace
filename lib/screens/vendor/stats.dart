@@ -1,6 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hulace/model/rating_model.dart';
+import 'package:hulace/model/review_model.dart';
+import 'package:provider/provider.dart';
 
+import '../../model/order_model.dart';
+import '../../model/package_model.dart';
+import '../../model/users.dart';
+import '../../provider/UserDataProvider.dart';
+import '../../utils/apis.dart';
 import '../../utils/constants.dart';
+import '../../widgets/profile_image.dart';
 import 'job_detail.dart';
 
 class Statistics extends StatefulWidget {
@@ -14,9 +25,8 @@ class _StatisticsState extends State<Statistics> {
 
   @override
   Widget build(BuildContext context) {
-    var height=MediaQuery.of(context).size.height;
-    var width=MediaQuery.of(context).size.width;
-    var margin=MediaQuery.of(context).size.width*0.04;
+    final provider = Provider.of<UserDataProvider>(context, listen: false);
+
     return Scaffold(
       backgroundColor: secondaryColor,
       body: Column(
@@ -28,14 +38,7 @@ class _StatisticsState extends State<Statistics> {
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                 color: secondaryColor,
-                /*gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.black,
-                      Color(0xff2e2e30),
-                    ],
-                  ),*/
+
               ),
               child: Column(
                 children: [
@@ -86,8 +89,8 @@ class _StatisticsState extends State<Statistics> {
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text("\$",style: TextStyle(color: Colors.white),),
-                              Text("EM5000",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12,color: Colors.white),)
+                              Text("Balance",style: TextStyle(color: Colors.white),),
+                              Text("EM${provider.userData!.balance}",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12,color: Colors.white),)
                             ],
                           ),
                           VerticalDivider(color: secondaryColor),
@@ -95,15 +98,39 @@ class _StatisticsState extends State<Statistics> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text("Category",style: TextStyle(color:Colors.white),),
-                              Text("Sports",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12,color:Colors.white),)
+                              Text(provider.userData!.businessCategory,style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12,color:Colors.white),)
                             ],
                           ),
                           VerticalDivider(color: secondaryColor,width: 2,),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text("Date",style: TextStyle(color:Colors.white)),
-                              Text("18/05/2022",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12,color:Colors.white))
+                              Text("Rating",style: TextStyle(color:Colors.white)),
+                              FutureBuilder<RatingModel>(
+                                  future: getRating(provider.userData!.userId),
+                                  builder: (context, AsyncSnapshot<RatingModel> snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return Container(
+                                        child: Text("-",style: TextStyle(fontSize: 10,fontWeight: FontWeight.w300)),
+                                      );
+                                    }
+                                    else {
+                                      if (snapshot.hasError) {
+                                        print("error ${snapshot.error}");
+                                        return Center(
+                                          child: Text("error ${snapshot.error}"),
+                                        );
+                                      }
+
+
+                                      else {
+                                        return Text("${snapshot.data!.rating} (${snapshot.data!.totalRatings})",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12,color:Colors.white));
+
+                                      }
+                                    }
+                                  }
+                              ),
+
                             ],
                           ),
                         ],
@@ -162,87 +189,148 @@ class _StatisticsState extends State<Statistics> {
                         height: MediaQuery.of(context).size.height*0.63,
 
                         child: TabBarView(children: <Widget>[
+                          StreamBuilder<QuerySnapshot>(
+                            stream: FirebaseFirestore.instance.collection('orders')
+                                .where("vendorId",isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                                .where("status",isEqualTo: "Completed").snapshots(),
+                            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                              if (snapshot.hasError) {
+                                return Text('Something went wrong');
+                              }
 
-                          ListView.builder(
-                            padding: EdgeInsets.only(top: 10),
-                            shrinkWrap: true,
-                            itemCount: 5,
-                            itemBuilder: (BuildContext context,int index){
-                              return Card(
-                                margin: EdgeInsets.only(bottom: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 5,right: 5,top: 5),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+
+                              if (snapshot.data!.size==0) {
+                                return Center(
+                                  child: Text("No Completed Orders"),
+                                );
+                              }
+
+                              return ListView(
+                                padding: EdgeInsets.only(top: 10),
+
+                                shrinkWrap: true,
+                                children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                                  Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                                  OrderModel model=OrderModel.fromMap(data,document.reference.id);
+                                  return Card(
+                                    margin: EdgeInsets.only(bottom: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 5,right: 5,top: 5),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Container(
-                                                margin: EdgeInsets.all(2),
-                                                height: 50,
-                                                width: 50,
-                                                decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(10),
-                                                    image: DecorationImage(
-                                                        image: AssetImage("assets/images/profile.png",),
-                                                        fit: BoxFit.cover
-                                                    )
-
-                                                ),
-
+                                              Row(
+                                                children: [
+                                                  ProfilePicture(provider.userData!.profilePic),
+                                                  SizedBox(width: 7,),
+                                                  Container(
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text("${provider.userData!.firstName} ${provider.userData!.lastName}",style: TextStyle(fontWeight: FontWeight.w500),),
+                                                        Text(model.category,style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12),),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
                                               ),
-                                              SizedBox(width: 7,),
-                                              Container(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text("Kim Joyce",style: TextStyle(fontWeight: FontWeight.w500),),
-                                                    Text("Category",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12),),
-                                                  ],
-                                                ),
-                                              )
+
+                                              Text(model.status,style: TextStyle(color: Colors.green,fontWeight: FontWeight.bold,fontSize: 12),)
                                             ],
                                           ),
-                                          Text("COMPLETED",style: TextStyle(color: Colors.green,fontWeight: FontWeight.bold,fontSize: 12),)
-                                        ],
-                                      ),
+                                        ),
+                                        FutureBuilder<PackageModel>(
+                                            future: getPackageData(model.packageId),
+                                            builder: (context, AsyncSnapshot<PackageModel> snapshot) {
+                                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                                return Container(
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.all(10),
+                                                      child: Text("-",textAlign: TextAlign.justify,style: TextStyle(fontWeight: FontWeight.w400),),
+                                                    )
+                                                );
+                                              }
+                                              else {
+                                                if (snapshot.hasError) {
+                                                  print("error ${snapshot.error}");
+                                                  return Center(
+                                                    child: Text("error ${snapshot.error}"),
+                                                  );
+                                                }
+
+
+                                                else {
+                                                  return Padding(
+                                                    padding: const EdgeInsets.all(10),
+                                                    child: Text(snapshot.data!.title,textAlign: TextAlign.justify,style: TextStyle(fontWeight: FontWeight.w400),),
+                                                  );
+
+                                                }
+                                              }
+                                            }
+                                        ),
+
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Divider(color: Colors.grey,),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(10),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text("${model.date} ${model.time}",style: TextStyle(fontWeight: FontWeight.w500),),
+                                              Text("KM${model.budget}",style: TextStyle(fontWeight: FontWeight.w500),),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10),
-                                      child: Text("Here will be the gig description provided by vendor",textAlign: TextAlign.justify,style: TextStyle(fontWeight: FontWeight.w400),),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Divider(color: Colors.grey,),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text("6/6/2022",style: TextStyle(fontWeight: FontWeight.w500),),
-                                          Text("\$200",style: TextStyle(fontWeight: FontWeight.w500),),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  );
+                                }).toList(),
                               );
                             },
                           ),
-                          ListView.builder(
-                            itemCount: 3,
-                            physics: NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemBuilder: (BuildContext context,int index){
-                              return InkWell(
-                                  child: Padding(
+
+                          StreamBuilder<QuerySnapshot>(
+                            stream: FirebaseFirestore.instance.collection('reviews')
+                                .where("vendorId",isEqualTo: FirebaseAuth.instance.currentUser!.uid).snapshots(),
+                            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                              if (snapshot.hasError) {
+                                return Text('Something went wrong');
+                              }
+
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+
+                              if (snapshot.data!.size==0) {
+                                return Center(
+                                  child: Text("No Reviews"),
+                                );
+                              }
+
+                              return ListView(
+                                padding: EdgeInsets.only(top: 10),
+
+                                shrinkWrap: true,
+                                children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                                  Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                                  ReviewModel model=ReviewModel.fromMap(data,document.reference.id);
+                                  return Padding(
                                       padding: const EdgeInsets.all(10),
                                       child: Column(
                                         children: [
@@ -257,31 +345,46 @@ class _StatisticsState extends State<Statistics> {
                                             ],
                                           ),
                                           SizedBox(height: 5,),
-                                          Text("$loremIpsum $loremIpsum",textAlign: TextAlign.justify,style: TextStyle(fontSize: 15,fontWeight: FontWeight.w300),),
+                                          Text("${model.review}",textAlign: TextAlign.justify,style: TextStyle(fontSize: 15,fontWeight: FontWeight.w300),),
+                                          FutureBuilder<UserModel>(
+                                              future: getUserData(model.customerId),
+                                              builder: (context, AsyncSnapshot<UserModel> snapshot) {
+                                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                                  return Container(
+                                                    child: Text("-",style: TextStyle(fontSize: 10,fontWeight: FontWeight.w300)),
+                                                  );
+                                                }
+                                                else {
+                                                  if (snapshot.hasError) {
+                                                    print("error ${snapshot.error}");
+                                                    return Center(
+                                                      child: Text("error ${snapshot.error}"),
+                                                    );
+                                                  }
 
-                                          ListTile(
-                                            contentPadding: EdgeInsets.zero,
-                                            leading: Container(
-                                              width: 40,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  image: DecorationImage(
-                                                      image: AssetImage("assets/images/profile.png",),
-                                                      fit: BoxFit.cover
-                                                  )
-                                              ),
 
-                                            ),
-                                            title: Text("CINDY A",style: TextStyle(fontWeight: FontWeight.w500,fontSize: 15),),
-                                            subtitle: Text("Jun 2, 2022",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12),),
+                                                  else {
+                                                    return ListTile(
+                                                      contentPadding: EdgeInsets.zero,
+                                                      leading: ProfilePicture(snapshot.data!.profilePic),
+                                                      title: Text("${snapshot.data!.firstName} ${snapshot.data!.lastName}",style: TextStyle(fontWeight: FontWeight.w500,fontSize: 15),),
+                                                      subtitle: Text(df.format(DateTime.fromMillisecondsSinceEpoch(model.createdAt)),style: TextStyle(fontWeight: FontWeight.w300,fontSize: 12),),
+                                                    );
+
+                                                  }
+                                                }
+                                              }
                                           ),
+
                                         ],
                                       )
-                                  )
+                                  );
+                                }).toList(),
                               );
                             },
                           ),
+
+                          
 
 
 

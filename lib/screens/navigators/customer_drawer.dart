@@ -1,11 +1,18 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hulace/screens/auth/intro.dart';
 import 'package:hulace/screens/customer/create_event.dart';
 import 'package:hulace/screens/customer/create_listing.dart';
 import 'package:hulace/screens/customer/my_order.dart';
+import 'package:hulace/screens/get_started/getstarted_auth.dart';
+import 'package:hulace/widgets/profile_image.dart';
+import 'package:provider/provider.dart';
 
+import '../../provider/UserDataProvider.dart';
 import '../../utils/constants.dart';
 import '../../utils/rate_us.dart';
+import '../auth/register.dart';
 import '../customer/my_requests.dart';
 
 class CustomerDrawer extends StatefulWidget {
@@ -18,6 +25,7 @@ class CustomerDrawer extends StatefulWidget {
 class _CustomerDrawerState extends State<CustomerDrawer> {
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<UserDataProvider>(context, listen: false);
     return Drawer(
         child: Column(
           children: [
@@ -33,23 +41,10 @@ class _CustomerDrawerState extends State<CustomerDrawer> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      margin: EdgeInsets.all(2),
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                              image: AssetImage("assets/images/profile.png",),
-                              fit: BoxFit.cover
-                          )
-
-                      ),
-
-                    ),
+                    ProfilePicture(provider.userData!.profilePic),
                     SizedBox(height: 10,),
                     //Text(provider.userData.,style: TextStyle(color: Colors.white,fontSize: 16),),
-                    Text("user@mail.com",style: TextStyle(color: Colors.white,fontSize: 14),),
+                    Text(provider.userData!.email,style: TextStyle(color: Colors.white,fontSize: 14),),
                   ],
                 ),
               ),
@@ -69,7 +64,7 @@ class _CustomerDrawerState extends State<CustomerDrawer> {
                       padding: EdgeInsets.all(10),
                       margin: EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                          color: primaryColor,
+                          color: lightColor,
                           borderRadius: BorderRadius.circular(10)
                       ),
                       alignment: Alignment.center,
@@ -83,7 +78,7 @@ class _CustomerDrawerState extends State<CustomerDrawer> {
                             children: [
                               Text("Create An Event",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
                               SizedBox(height: 3,),
-                              Text("6/6/2022",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w300),),
+                              Text(df.format(DateTime.now()),style: TextStyle(fontSize: 12,fontWeight: FontWeight.w300),),
                             ],
                           ),
                           Icon(Icons.keyboard_arrow_right,color: Colors.grey[700],)
@@ -114,7 +109,7 @@ class _CustomerDrawerState extends State<CustomerDrawer> {
                             children: [
                               Text("Create A Request",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.white),),
                               SizedBox(height: 3,),
-                              Text("6/6/2022",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w300,color: Colors.white),),
+                              Text(df.format(DateTime.now()),style: TextStyle(fontSize: 12,fontWeight: FontWeight.w300,color: Colors.white),),
                             ],
                           ),
                           Icon(Icons.keyboard_arrow_right,color: Colors.white,)
@@ -171,8 +166,11 @@ class _CustomerDrawerState extends State<CustomerDrawer> {
                     title: Text("Contact Us"),
                   ),
                   ListTile(
-                    onTap: (){
+                    onTap: ()async{
+                      await FirebaseAuth.instance.signOut().then((value){
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => GetStartedAuth()));
 
+                      });
                     },
                     leading: Icon(Icons.logout),
                     title: Text("Logout"),

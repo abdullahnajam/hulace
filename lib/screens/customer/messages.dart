@@ -1,18 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hulace/screens/navigators/vendor_drawer.dart';
 import 'package:hulace/utils/constants.dart';
 
+import '../../model/chat_head_model.dart';
 import '../navigators/customer_drawer.dart';
 
-class UserChatList extends StatefulWidget {
-  const UserChatList({Key? key}) : super(key: key);
+class ChatList extends StatefulWidget {
+  const ChatList({Key? key}) : super(key: key);
 
   @override
-  _UserChatListState createState() => _UserChatListState();
+  _ChatListState createState() => _ChatListState();
 }
 
-class _UserChatListState extends State<UserChatList> {
+class _ChatListState extends State<ChatList> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   void _openDrawer () {
     _drawerKey.currentState!.openDrawer();
@@ -145,6 +147,7 @@ class _UserChatListState extends State<UserChatList> {
               ],
             ),
           ),
+          
           Expanded(
             //height: MediaQuery.of(context).size.height*0.65,
             //width: MediaQuery.of(context).size.width,
@@ -155,57 +158,84 @@ class _UserChatListState extends State<UserChatList> {
                   color: bgColor,
                   borderRadius: BorderRadius.circular(20)
               ),
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: 5,
-                itemBuilder: (BuildContext context,int index){
-                  return Card(
-                    margin: EdgeInsets.only(bottom: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 10,),
-                        ListTile(
-                          leading: Container(
-                            margin: EdgeInsets.all(2),
-                            height: 50,
-                            width: 50,
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                    image: AssetImage("assets/images/profile.png",),
-                                    fit: BoxFit.cover
-                                )
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('chat_head').snapshots(),
+                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('Something went wrong');
+                  }
 
-                            ),
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-                          ),
-                          title: Text("Kim Joyce",style: TextStyle(fontWeight: FontWeight.w500),),
-                          subtitle:  Text("Lorem ipsum dolor sit amet",style: TextStyle(fontWeight: FontWeight.w300),),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text("2 min ago",style: TextStyle(fontSize:12,fontWeight: FontWeight.w300),),
-                              SizedBox(height: 5,),
-                              CircleAvatar(
-                                radius: 12,
-                                backgroundColor: primaryColor,
-                                child: Text("2",style: TextStyle(fontSize:12,fontWeight: FontWeight.w300),),
-                              )
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10,),
-                      ],
-                    ),
+                  if (snapshot.data!.size==0) {
+                    return Center(
+                      child: Text("No Chats"),
+                    );
+                  }
+
+                  return ListView(
+                    padding: EdgeInsets.only(top: 10),
+
+                    shrinkWrap: true,
+                    children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                      Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                      ChatHeadModel model=ChatHeadModel.fromMap(data,document.reference.id);
+                      return ChatHead(model);
+                    }).toList(),
                   );
                 },
               ),
             ),
-          )
+          ),
+
+        ],
+      ),
+    );
+  }
+  Widget ChatHead(ChatHeadModel model){
+    return Card(
+      margin: EdgeInsets.only(bottom: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          SizedBox(height: 10,),
+          ListTile(
+            leading: Container(
+              margin: EdgeInsets.all(2),
+              height: 50,
+              width: 50,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                      image: AssetImage("assets/images/profile.png",),
+                      fit: BoxFit.cover
+                  )
+
+              ),
+
+            ),
+            title: Text("Kim Joyce",style: TextStyle(fontWeight: FontWeight.w500),),
+            subtitle:  Text("Lorem ipsum dolor sit amet",style: TextStyle(fontWeight: FontWeight.w300),),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("2 min ago",style: TextStyle(fontSize:12,fontWeight: FontWeight.w300),),
+                SizedBox(height: 5,),
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: primaryColor,
+                  child: Text("2",style: TextStyle(fontSize:12,fontWeight: FontWeight.w300),),
+                )
+              ],
+            ),
+          ),
+          SizedBox(height: 10,),
         ],
       ),
     );

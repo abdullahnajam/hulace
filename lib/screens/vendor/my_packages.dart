@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hulace/model/package_model.dart';
 import 'package:hulace/screens/navigators/vendor_drawer.dart';
 
 import '../../utils/constants.dart';
@@ -127,6 +130,7 @@ class _MyPackagesState extends State<MyPackages> {
               ],
             ),
           ),
+
           Expanded(
             //height: MediaQuery.of(context).size.height*0.65,
             //width: MediaQuery.of(context).size.width,
@@ -140,65 +144,89 @@ class _MyPackagesState extends State<MyPackages> {
                     topRight: Radius.circular(20),
                   )
               ),
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: 5,
-                itemBuilder: (BuildContext context,int index){
-                  return Card(
-                    margin: EdgeInsets.only(bottom: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          margin: EdgeInsets.all(2),
-                          height: MediaQuery.of(context).size.height*0.2,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10),
+              child:  StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('packages')
+                    .where("userId",isEqualTo: FirebaseAuth.instance.currentUser!.uid).snapshots(),
+                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('Something went wrong');
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  if (snapshot.data!.size==0) {
+                    return Center(
+                      child: Text("No Packages"),
+                    );
+                  }
+
+                  return ListView(
+                    padding: EdgeInsets.only(top: 10),
+
+                    shrinkWrap: true,
+                    children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                      Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                      PackageModel model=PackageModel.fromMap(data,document.reference.id);
+                      return Card(
+                        margin: EdgeInsets.only(bottom: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.all(2),
+                              height: MediaQuery.of(context).size.height*0.2,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(10),
+                                    topRight: Radius.circular(10),
+                                  ),
+                                  image: DecorationImage(
+                                      image: NetworkImage(model.image,),
+                                      fit: BoxFit.cover
+                                  )
+
                               ),
-                              image: DecorationImage(
-                                  image: AssetImage("assets/images/event1.png",),
-                                  fit: BoxFit.cover
-                              )
 
-                          ),
+                            ),
 
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10,right: 5,top: 5),
+                              child: Text(model.title,style: TextStyle(fontWeight: FontWeight.w300,fontSize: 15),),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Text(model.description,textAlign: TextAlign.justify,style: TextStyle(fontWeight: FontWeight.w400),),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Divider(color: Colors.grey,),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(model.category,style: TextStyle(fontWeight: FontWeight.w500),),
+                                  Text("\$${model.budget}",style: TextStyle(fontWeight: FontWeight.w500),),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10,right: 5,top: 5),
-                          child: Text("Gig Title",style: TextStyle(fontWeight: FontWeight.w300,fontSize: 15),),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text("Here will be the gig description provided by vendor",textAlign: TextAlign.justify,style: TextStyle(fontWeight: FontWeight.w400),),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Divider(color: Colors.grey,),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Category",style: TextStyle(fontWeight: FontWeight.w500),),
-                              Text("\$200",style: TextStyle(fontWeight: FontWeight.w500),),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      );
+                    }).toList(),
                   );
                 },
-              ),
+              )
             ),
-          )
+          ),
         ],
       ),
     );
