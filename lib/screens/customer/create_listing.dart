@@ -32,9 +32,9 @@ class _CreateListingState extends State<CreateListing> {
   String selectedCategory="";
 
   int selectedCategoryIndex=-1;
-  Future<List<CategoryModel>> getCategories()async{
+  Future<List<CategoryModel>> getCategory()async{
     List<CategoryModel> categories=[];
-    await FirebaseFirestore.instance.collection('categories').get().then((QuerySnapshot querySnapshot) {
+    await FirebaseFirestore.instance.collection('services').get().then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
         Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
         CategoryModel model=CategoryModel.fromMap(data, doc.reference.id);
@@ -347,7 +347,7 @@ class _CreateListingState extends State<CreateListing> {
                         ),
                       ),
                       FutureBuilder<List<CategoryModel>>(
-                          future: getCategories(),
+                          future: getCategory(),
                           builder: (context, AsyncSnapshot<List<CategoryModel>> snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
                               return Container(

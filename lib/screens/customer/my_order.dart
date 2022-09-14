@@ -8,7 +8,7 @@ import 'package:hulace/screens/customer/order_detail.dart';
 import 'package:hulace/widgets/profile_image.dart';
 
 import '../../model/users.dart';
-import '../../utils/apis.dart';
+import '../../api/firebase_apis.dart';
 import '../../utils/constants.dart';
 
 class MyOrders extends StatefulWidget {

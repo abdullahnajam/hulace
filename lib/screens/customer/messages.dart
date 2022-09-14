@@ -1,10 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hulace/screens/chat_screen.dart';
 import 'package:hulace/screens/navigators/vendor_drawer.dart';
 import 'package:hulace/utils/constants.dart';
+import 'package:hulace/widgets/profile_image.dart';
+import 'package:provider/provider.dart';
+import 'package:timeago/timeago.dart';
 
 import '../../model/chat_head_model.dart';
+import '../../model/users.dart';
+import '../../provider/UserDataProvider.dart';
+import '../../api/firebase_apis.dart';
 import '../navigators/customer_drawer.dart';
 
 class ChatList extends StatefulWidget {
@@ -53,7 +61,7 @@ class _ChatListState extends State<ChatList> {
                         onTap: (){
                           _openDrawer();
                         },
-                        child: Image.asset("assets/images/menu.png",color: primaryColor,height: 40,),
+                        child: Image.asset("assets/images/menu.png",color: Colors.white,height: 40,),
                       ),
 
 
@@ -101,7 +109,7 @@ class _ChatListState extends State<ChatList> {
                               bottomLeft:Radius.circular(10),
                             )*/
                           ),
-                          child: Icon(Icons.search,color: secondaryColor,),
+                          child: Icon(Icons.search,color: whiteColor,),
                         ),
                         Expanded(
                           child: TextFormField(
@@ -197,46 +205,67 @@ class _ChatListState extends State<ChatList> {
     );
   }
   Widget ChatHead(ChatHeadModel model){
-    return Card(
-      margin: EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        children: [
-          SizedBox(height: 10,),
-          ListTile(
-            leading: Container(
-              margin: EdgeInsets.all(2),
-              height: 50,
-              width: 50,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                      image: AssetImage("assets/images/profile.png",),
-                      fit: BoxFit.cover
-                  )
+    return InkWell(
+      onTap: (){
+        final provider = Provider.of<UserDataProvider>(context, listen: false);
+        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ChatScreen(provider.userData!.type, model.vendorId==FirebaseAuth.instance.currentUser!.uid?model.customerId:model.vendorId)));
 
-              ),
+      },
+      child: Card(
+        margin: EdgeInsets.only(bottom: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            SizedBox(height: 10,),
+            FutureBuilder<UserModel>(
+                future: getUserData(model.vendorId==FirebaseAuth.instance.currentUser!.uid?model.customerId:model.vendorId),
+                builder: (context, AsyncSnapshot<UserModel> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return ListTile(
+                      leading: ProfilePicture(""),
+                      title: Text("-",style: TextStyle(fontWeight: FontWeight.w500),),
+                      subtitle:  Text(model.lastMessage,style: TextStyle(fontWeight: FontWeight.w300),),
 
+                    );
+                  }
+                  else {
+                    if (snapshot.hasError) {
+                      print("error ${snapshot.error}");
+                      return Center(
+                        child: Text("error ${snapshot.error}"),
+                      );
+                    }
+
+
+                    else {
+                      return  ListTile(
+                        leading: ProfilePicture(snapshot.data!.profilePic),
+                        title: Text("${snapshot.data!.firstName} ${snapshot.data!.lastName}",style: TextStyle(fontWeight: FontWeight.w500),),
+                        subtitle:  Text(model.lastMessage,style: TextStyle(fontWeight: FontWeight.w300),),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(format(DateTime.fromMillisecondsSinceEpoch(model.timestamp)),style: TextStyle(fontSize:10,fontWeight: FontWeight.w300),),
+                            SizedBox(height: 5,),
+                            CircleAvatar(
+                              radius: 12,
+                              backgroundColor: primaryColor,
+                              child: Text("2",style: TextStyle(fontSize:12,fontWeight: FontWeight.w300),),
+                            )
+                          ],
+                        ),
+                      );
+
+                    }
+                  }
+                }
             ),
-            title: Text("Kim Joyce",style: TextStyle(fontWeight: FontWeight.w500),),
-            subtitle:  Text("Lorem ipsum dolor sit amet",style: TextStyle(fontWeight: FontWeight.w300),),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("2 min ago",style: TextStyle(fontSize:12,fontWeight: FontWeight.w300),),
-                SizedBox(height: 5,),
-                CircleAvatar(
-                  radius: 12,
-                  backgroundColor: primaryColor,
-                  child: Text("2",style: TextStyle(fontSize:12,fontWeight: FontWeight.w300),),
-                )
-              ],
-            ),
-          ),
-          SizedBox(height: 10,),
-        ],
+
+            SizedBox(height: 10,),
+          ],
+        ),
       ),
     );
   }

@@ -1,13 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cool_alert/cool_alert.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hulace/model/proposal_model.dart';
 import 'package:hulace/model/request_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../../api/payment_service.dart';
 import '../../model/users.dart';
-import '../../utils/apis.dart';
+import '../../api/firebase_apis.dart';
 import '../../utils/constants.dart';
-
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 class ViewProposals extends StatefulWidget {
   RequestModel request;
 
@@ -223,8 +225,71 @@ class _ViewProposalsState extends State<ViewProposals> {
                                   child: Text(model.cover),
                                 ),
                                 InkWell(
-                                  onTap: (){
+                                  onTap: ()async{
+                                    DatePicker.showDateTimePicker(context,
+                                        showTitleActions: true,
+                                        minTime: DateTime.now(),
+                                        maxTime: DateTime(2100, 6, 7),
+                                        onChanged: (date) {
+                                          print('change $date');
+                                        },
+                                        onConfirm: (date) async{
+                                          print('confirmed $date');
+                                          CoolAlert.show(
+                                              context: context,
+                                              type: CoolAlertType.confirm,
+                                              text: "Are you sure you want to place the order?",
+                                              onConfirmBtnTap: ()async{
+                                                PaymentService _payment=PaymentService();
+                                                Navigator.pop(context);
+                                                _payment.payment(model.cost).then((value)async{
+                                                  await FirebaseFirestore.instance.collection('orders').add({
+                                                    "vendorId":model.vendorId,
+                                                    "customerId":FirebaseAuth.instance.currentUser!.uid,
+                                                    "budget":model.cost,
+                                                    "status":"In Progress",
+                                                    "category":"",
+                                                    "date": df.format(date),
+                                                    "time": tf.format(date),
+                                                    "packageId": model.id,
+                                                    "paymentStatus": "Paid",
+                                                    "isRated": false,
+                                                    "rating": 0,
+                                                    "dateTime":date.millisecondsSinceEpoch,
+                                                    "createdAt":DateTime.now().millisecondsSinceEpoch,
 
+                                                  }).then((val)async{
+                                                    FirebaseFirestore.instance.collection('proposals').doc(model.id).update({
+                                                      "status":"Ordered"
+                                                    });
+                                                    CoolAlert.show(
+                                                        context: context,
+                                                        type: CoolAlertType.success,
+                                                        text: "Order Placed",
+                                                        onConfirmBtnTap: (){
+                                                          Navigator.pop(context);
+                                                          Navigator.pop(context);
+                                                        }
+                                                    );
+                                                  }).onError((error, stackTrace){
+                                                    Navigator.pop(context);
+                                                    CoolAlert.show(
+                                                      context: context,
+                                                      type: CoolAlertType.error,
+                                                      text: error.toString(),
+                                                    );
+                                                  });
+                                                });
+
+
+                                              }
+                                          );
+
+
+                                        },
+                                        currentTime: DateTime.now(),
+                                        locale: LocaleType.en
+                                    );
                                   },
                                   child: Container(
                                     height: 40,

@@ -48,7 +48,7 @@ class _ChooseInterestsState extends State<ChooseInterests> {
                       return InkWell(
                         child: Column(
                           children: [
-                            Expanded(
+                            /*Expanded(
                               child: Container(
                                 decoration: BoxDecoration(
                                     shape: BoxShape.circle,
@@ -60,7 +60,7 @@ class _ChooseInterestsState extends State<ChooseInterests> {
                                 ),
                               ),
                             ),
-                            SizedBox(height: 10,),
+                            SizedBox(height: 10,),*/
                             Text("Event",textAlign: TextAlign.center,style: TextStyle(fontSize:16,fontWeight: FontWeight.w400),),
 
                           ],

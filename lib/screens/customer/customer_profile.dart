@@ -128,7 +128,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
                         onTap: (){
                           _openDrawer();
                         },
-                        child: Image.asset("assets/images/menu.png",color: primaryColor,height: 40,),
+                        child: Image.asset("assets/images/menu.png",color: bgColor,height: 40,),
                       ),
 
 
@@ -240,13 +240,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
                                   title: Text("Address",style: TextStyle(fontWeight: FontWeight.w500),),
                                   subtitle: Text(provider.userData!.location,style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w300,fontSize: 13),),
                                 ),
-                                ListTile(
-                                  onTap: (){
-                                  },
-                                  leading: Icon(Icons.person),
-                                  title: Text("Age",style: TextStyle(fontWeight: FontWeight.w500),),
-                                  subtitle: Text(provider.userData!.age,style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w300,fontSize: 13),),
-                                ),
+
 
 
                               ],
@@ -322,8 +316,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
                                 },
                                 child: Container(
                                   width: MediaQuery.of(context).size.width*0.4,
-                                  alignment: Alignment.center,
-                                  padding: EdgeInsets.fromLTRB(20,10,20,10),
+                                  //alignment: Alignment.center,
+                                  padding: EdgeInsets.fromLTRB(0,10,20,10),
                                   decoration: BoxDecoration(
                                       color: secondaryColor,
                                       borderRadius: BorderRadius.circular(4)
@@ -341,23 +335,6 @@ class _CustomerProfileState extends State<CustomerProfile> {
                 SizedBox(
                   height: 10,
                 ),
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: (){
-                        context.read<UserDataProvider>().increase();
-                      },
-                      icon: Icon(Icons.add),
-                    ),
-                    Text(context.watch<UserDataProvider>().count.toString()),
-                    IconButton(
-                      onPressed: (){
-                        context.read<UserDataProvider>().decrease();
-                      },
-                      icon: Icon(Icons.remove),
-                    ),
-                  ],
-                )
 
 
 

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cool_alert/cool_alert.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hulace/api/firebase_apis.dart';
 import 'package:hulace/screens/navigators/vendor_nav.dart';
 import 'package:hulace/screens/vendor/turn_on_location.dart';
 import 'package:hulace/utils/constants.dart';
@@ -29,17 +30,6 @@ class _CompleteVendorAuthState extends State<CompleteVendorAuth> {
   List<String> employeeList=['Individual','<10','>6'];
   int selectedCategoryIndex=0;
 
-  Future<List<CategoryModel>> getCategories()async{
-    List<CategoryModel> categories=[];
-    await FirebaseFirestore.instance.collection('categories').get().then((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
-        Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
-        CategoryModel model=CategoryModel.fromMap(data, doc.reference.id);
-        categories.add(model);
-      });
-    });
-    return categories;
-  }
 
 
   @override
@@ -352,7 +342,7 @@ class _CompleteVendorAuthState extends State<CompleteVendorAuth> {
         Container(
           height: MediaQuery.of(context).size.height*0.7,
           child: FutureBuilder<List<CategoryModel>>(
-              future: getCategories(),
+              future: getServices(),
               builder: (context, AsyncSnapshot<List<CategoryModel>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Container(
@@ -368,13 +358,13 @@ class _CompleteVendorAuthState extends State<CompleteVendorAuth> {
                   }
                   else if(snapshot.data!.isEmpty){
                     return const Center(
-                      child: Text("No Categories"),
+                      child: Text("No Services"),
                     );
                   }
 
                   else {
 
-                    return Wrap(
+                    /*return Wrap(
                       spacing: 5,
                       children: List.generate(
                         snapshot.data!.length,
@@ -392,6 +382,55 @@ class _CompleteVendorAuthState extends State<CompleteVendorAuth> {
                           );
                         },
                       ),
+                    );*/
+
+                    return GridView.builder(
+                        padding: EdgeInsets.only(left: 10,right: 10),
+                        gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+
+                            childAspectRatio: MediaQuery.of(context).size.width / (MediaQuery.of(context).size.height / 2.0),
+                            crossAxisSpacing: 10,
+                            crossAxisCount: 3,
+                            mainAxisSpacing: 10
+                        ),
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (BuildContext ctx, index) {
+                          return InkWell(
+                              onTap: (){
+                                setState(() {
+                                  selectedCategoryIndex=index;
+                                  selectedCategory=snapshot.data![index].name;
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: selectedCategoryIndex==index?Colors.grey[400]:Colors.grey[200]
+                                ),
+                                padding: EdgeInsets.all(10),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    /*Expanded(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(color: primaryColor,width: 2),
+                                            image: DecorationImage(
+                                                image: NetworkImage(snapshot.data![index].image),
+                                                fit: BoxFit.cover
+                                            )
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 5,),*/
+                                    Text(snapshot.data![index].name,textAlign: TextAlign.center,style: TextStyle(fontSize:14,fontWeight: FontWeight.w400),),
+
+                                  ],
+                                ),
+                              )
+                          );
+                        }
                     );
                   }
                 }

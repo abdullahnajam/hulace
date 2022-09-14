@@ -5,13 +5,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:hulace/api/payment_service.dart';
 import 'package:hulace/screens/chat_screen.dart';
 import 'package:hulace/utils/constants.dart';
 import 'package:hulace/widgets/profile_image.dart';
+import 'package:provider/provider.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
 
 import '../../model/package_model.dart';
 import '../../model/users.dart';
+import '../../provider/UserDataProvider.dart';
 
 class ViewVendor extends StatefulWidget {
   UserModel vendor;
@@ -23,8 +26,10 @@ class ViewVendor extends StatefulWidget {
 }
 
 class _ViewVendorState extends State<ViewVendor> {
+  bool _loading=false;
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<UserDataProvider>(context, listen: false);
     return Scaffold(
       backgroundColor: secondaryColor,
       body: Container(
@@ -63,24 +68,74 @@ class _ViewVendorState extends State<ViewVendor> {
                       ),
                     ),
 
-                   /* InkWell(
-                      onTap: (){
-                        //Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => UserNotifications()));
+                    InkWell(
+                      onTap: ()async{
+                        setState(() {
+                          _loading=true;
+                        });
+                        if(provider.userData!.favouriteVendors.contains(widget.vendor.userId)){
+                          List ids=provider.userData!.favouriteVendors;
+                          ids.remove(widget.vendor.userId);
+                          await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update({
+                            "favouriteVendors":ids,
+                          }).then((value){
+                            setState(() {
+                              provider.userData!.favouriteVendors.remove(widget.vendor.userId);
+                              _loading=false;
+                            });
+
+                          });
+                        }
+                        else{
+                          List ids=provider.userData!.favouriteVendors;
+                          ids.add(widget.vendor.userId);
+                          await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update({
+                            "favouriteVendors":ids,
+                          }).then((value){
+                            setState(() {
+                              provider.userData!.favouriteVendors.add(widget.vendor.userId);
+                              _loading=false;
+                            });
+                          });
+                        }
                       },
-                      child: Container(
-                        height: 50,
-                        child: Card(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50)
-                            ),
-                            elevation: 3,
-                            child: CircleAvatar(
-                                backgroundColor: Colors.white,
-                                child:  Icon(Icons.favorite_border,color: primaryColor,)
-                            )
-                        ),
+                      child: _loading?
+                      CupertinoActivityIndicator(color: Colors.white,)
+                          :
+                      Consumer<UserDataProvider>(
+                        builder: (context,user,child){
+                          if(user.userData!.favouriteVendors.contains(widget.vendor.userId))
+                            return Container(
+                              height: 50,
+                              child: Card(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50)
+                                  ),
+                                  elevation: 3,
+                                  child: CircleAvatar(
+                                      backgroundColor: Colors.white,
+                                      child:  Icon(Icons.favorite,color: Colors.red,)
+                                  )
+                              ),
+                            );
+                          else
+                            return Container(
+                              height: 50,
+                              child: Card(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50)
+                                  ),
+                                  elevation: 3,
+                                  child: CircleAvatar(
+                                      backgroundColor: Colors.white,
+                                      child:  Icon(Icons.favorite_border,color: primaryColor,)
+                                  )
+                              ),
+                            );
+                        },
                       ),
-                    ),*/
+                    ),
+
                   ],
                 ),
               ),
@@ -111,7 +166,7 @@ class _ViewVendorState extends State<ViewVendor> {
                             "customerId":FirebaseAuth.instance.currentUser!.uid,
                             "vendorId":widget.vendor.userId,
                           }).then((value){
-                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ChatScreen("Customer",widget.vendor.userId,"${FirebaseAuth.instance.currentUser!.uid}-${widget.vendor.userId}")));
+                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ChatScreen("Customer",widget.vendor.userId)));
                           }).onError((error, stackTrace){
                             Navigator.pop(context);
                             CoolAlert.show(
@@ -265,7 +320,7 @@ class _ViewVendorState extends State<ViewVendor> {
                                   ),
 
                                   InkWell(
-                                    onTap:(){
+                                    onTap:()async{
                                       DatePicker.showDateTimePicker(context,
                                           showTitleActions: true,
                                           minTime: DateTime.now(),
@@ -274,56 +329,55 @@ class _ViewVendorState extends State<ViewVendor> {
                                             print('change $date');
                                           },
                                           onConfirm: (date) async{
+                                            print('confirmed $date');
                                             CoolAlert.show(
-                                              context: context,
-                                              type: CoolAlertType.confirm,
-                                              text: "Are you sure you want to place the order?",
-                                              onConfirmBtnTap: ()async{
-                                                final ProgressDialog pr = ProgressDialog(context: context);
-                                                pr.show(max: 100, msg: 'Please Wait');
-
-                                                await FirebaseFirestore.instance.collection('orders').add({
-                                                  "vendorId":model.userId,
-                                                  "customerId":FirebaseAuth.instance.currentUser!.uid,
-                                                  "budget":model.budget,
-                                                  "status":"In Progress",
-                                                  "category":model.category,
-                                                  "date": df.format(date),
-                                                  "time": tf.format(date),
-                                                  "packageId": model.id,
-                                                  "paymentStatus": "Not Paid",
-                                                  "isRated": false,
-                                                  "rating": 0,
-                                                  "dateTime":date.millisecondsSinceEpoch,
-                                                  "createdAt":DateTime.now().millisecondsSinceEpoch,
-
-                                                }).then((val)async{
-                                                  pr.close();
-                                                  CoolAlert.show(
-                                                      context: context,
-                                                      type: CoolAlertType.success,
-                                                      text: "Order Placed",
-                                                      onConfirmBtnTap: (){
-                                                        Navigator.pop(context);
-                                                        Navigator.pop(context);
-                                                      }
-                                                  );
-
-
-
-
-
-                                                }).onError((error, stackTrace){
-                                                  pr.close();
+                                                context: context,
+                                                type: CoolAlertType.confirm,
+                                                text: "Are you sure you want to place the order?",
+                                                onConfirmBtnTap: ()async{
+                                                  PaymentService _payment=PaymentService();
                                                   Navigator.pop(context);
-                                                  CoolAlert.show(
-                                                    context: context,
-                                                    type: CoolAlertType.error,
-                                                    text: error.toString(),
-                                                  );
-                                                });
-                                              }
+                                                  _payment.payment(model.budget).then((value)async{
+                                                    await FirebaseFirestore.instance.collection('orders').add({
+                                                      "vendorId":model.userId,
+                                                      "customerId":FirebaseAuth.instance.currentUser!.uid,
+                                                      "budget":model.budget,
+                                                      "status":"In Progress",
+                                                      "category":model.category,
+                                                      "date": df.format(date),
+                                                      "time": tf.format(date),
+                                                      "packageId": model.id,
+                                                      "paymentStatus": "Paid",
+                                                      "isRated": false,
+                                                      "rating": 0,
+                                                      "dateTime":date.millisecondsSinceEpoch,
+                                                      "createdAt":DateTime.now().millisecondsSinceEpoch,
+
+                                                    }).then((val)async{
+                                                      CoolAlert.show(
+                                                          context: context,
+                                                          type: CoolAlertType.success,
+                                                          text: "Order Placed",
+                                                          onConfirmBtnTap: (){
+                                                            Navigator.pop(context);
+                                                            Navigator.pop(context);
+                                                          }
+                                                      );
+                                                    }).onError((error, stackTrace){
+                                                      Navigator.pop(context);
+                                                      CoolAlert.show(
+                                                        context: context,
+                                                        type: CoolAlertType.error,
+                                                        text: error.toString(),
+                                                      );
+                                                    });
+                                                  });
+
+
+                                                }
                                             );
+
+
                                           },
                                           currentTime: DateTime.now(),
                                           locale: LocaleType.en

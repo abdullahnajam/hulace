@@ -14,7 +14,7 @@ import 'package:sn_progress_dialog/progress_dialog.dart';
 
 import '../../model/package_model.dart';
 import '../../model/users.dart';
-import '../../utils/apis.dart';
+import '../../api/firebase_apis.dart';
 
 class VendorOrderDetail extends StatefulWidget {
   OrderModel order;

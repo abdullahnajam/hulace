@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hulace/api/firebase_apis.dart';
 import 'package:hulace/screens/vendor/job_detail.dart';
 import 'package:hulace/screens/navigators/vendor_drawer.dart';
 import 'package:hulace/utils/constants.dart';
@@ -28,9 +29,9 @@ class _JobsState extends State<Jobs> {
   int selectedCategoryIndex=0;
   String selectedCategory="All Categories";
   Future<List<CategoryModel>> getCategories()async{
-    CategoryModel cat=CategoryModel("",'All Categories');
+    CategoryModel cat=CategoryModel("",'All Categories',"",primaryColor.value);
     List<CategoryModel> categories=[cat];
-    await FirebaseFirestore.instance.collection('categories').get().then((QuerySnapshot querySnapshot) {
+    await FirebaseFirestore.instance.collection('services').get().then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
         Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
         CategoryModel model=CategoryModel.fromMap(data, doc.reference.id);
@@ -77,41 +78,13 @@ class _JobsState extends State<Jobs> {
                           onTap: (){
                             _openDrawer();
                           },
-                          child: Image.asset("assets/images/menu.png",color: primaryColor,height: 40,),
+                          child: Image.asset("assets/images/menu.png",color: bgColor,height: 40,),
                         ),
 
-
-                        InkWell(
-                          onTap: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => UserNotifications()));
-                          },
-                          child: Container(
-                            height: 50,
-                            child: Card(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(50)
-                                ),
-                                elevation: 3,
-                                child: CircleAvatar(
-                                    backgroundColor: Colors.white,
-                                    child:  Icon(Icons.notifications_none,color: primaryColor,)
-                                )
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      children: [
-                        Image.asset("assets/images/icon.png",height: 25,color: primaryColor,),
-                        SizedBox(width: 10,),
-                        Text("Hulace, Discover Events To Host",style: TextStyle(color: Colors.white,fontSize: 22,fontWeight: FontWeight.w500),)
-                      ],
-                    ),
-                  ),
+
                   SizedBox(height: 10,),
                   Container(
                     height: 60,
@@ -137,7 +110,7 @@ class _JobsState extends State<Jobs> {
                             child: Icon(Icons.search,color: secondaryColor,),
                           ),
                           SizedBox(width: 10,),
-                          Text("Find amazing events",style: TextStyle(fontSize: 16,color: Colors.grey),)
+                          Text("Find Jobs",style: TextStyle(fontSize: 16,color: Colors.grey),)
                         ],
                       ),
                     ),
@@ -164,7 +137,7 @@ class _JobsState extends State<Jobs> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Category Events",style: TextStyle(fontSize:18,fontWeight: FontWeight.w500),),
+                        Text("Categories",style: TextStyle(fontSize:18,fontWeight: FontWeight.w500),),
                         //Text("View All",style: TextStyle(color: primaryColor,fontWeight: FontWeight.w500),),
                       ],
                     ),

@@ -9,6 +9,7 @@ import 'package:hulace/screens/auth/onboarding.dart';
 import 'package:hulace/screens/navigators/customer_nav.dart';
 import 'package:hulace/screens/navigators/vendor_nav.dart';
 import 'package:hulace/utils/constants.dart';
+import 'package:hulace/utils/notification_helper.dart';
 import 'package:provider/provider.dart';
 
 import 'model/users.dart';
@@ -27,6 +28,7 @@ class _SplashScreenState extends State<SplashScreen>  with TickerProviderStateMi
   @override
   void initState() {
     super.initState();
+    Notifications.init();
     animationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 700),
@@ -49,52 +51,48 @@ class _SplashScreenState extends State<SplashScreen>  with TickerProviderStateMi
     return Timer(_duration, navigationPage);
   }
 
-  void navigationPage() async{
-    if(FirebaseAuth.instance.currentUser!=null){
-      await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get().then((DocumentSnapshot documentSnapshot) async{
-        if (documentSnapshot.exists) {
-          print("user exists");
-          Map<String, dynamic> data = documentSnapshot.data()! as Map<String, dynamic>;
-          UserModel user=UserModel.fromMap(data,documentSnapshot.reference.id);
-          print("user ${user.userId} ${user.status}");
-          if(user.status=="Pending"){
-            FirebaseAuth.instance.signOut();
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => IntroScreen()));
 
-          }
-          else if(user.status=="Blocked"){
-            FirebaseAuth.instance.signOut();
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => IntroScreen()));
-          }
+ void navigationPage() async{
+  if(FirebaseAuth.instance.currentUser!=null){
+    await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get().then((DocumentSnapshot documentSnapshot) async{
+      if (documentSnapshot.exists) {
+        print("user exists");
+        Map<String, dynamic> data = documentSnapshot.data()! as Map<String, dynamic>;
+        UserModel user=UserModel.fromMap(data,documentSnapshot.reference.id);
+        print("user ${user.userId} ${user.status}");
+        if(user.status=="Pending"){
+          FirebaseAuth.instance.signOut();
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => IntroScreen()));
 
-          else if(user.status=="Approved"){
-            final provider = Provider.of<UserDataProvider>(context, listen: false);
-            provider.setUserData(user);
-            if(user.type=="Customer"){
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => CustomerNavBar()));
-            }
-            else{
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => VendorNavBar()));
-            }
-
-
-          }
         }
-        else{
+        else if(user.status=="Blocked"){
+          FirebaseAuth.instance.signOut();
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => IntroScreen()));
         }
 
-      });
-    }
-    else{
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => IntroScreen()));
+        else if(user.status=="Approved"){
+          final provider = Provider.of<UserDataProvider>(context, listen: false);
+          provider.setUserData(user);
+          if(user.type=="Customer"){
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => CustomerNavBar()));
+          }
+          else{
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => VendorNavBar()));
+          }
 
-    }
 
+        }
+      }
+      else{
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => IntroScreen()));
+      }
 
-
+    });
   }
-
+  else{
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => IntroScreen()));
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,43 +100,13 @@ class _SplashScreenState extends State<SplashScreen>  with TickerProviderStateMi
         body: Stack(
           children: [
             Align(
-                alignment: Alignment.center,
-                child:  Padding(
-                  padding: EdgeInsets.all(20),
-                  child: AnimatedBuilder(
-                    animation: animationController!,
-                    builder: (context, child) {
-                      return Container(
-                        decoration: ShapeDecoration(
-                          color: Colors.white.withOpacity(0.5),
-                          shape: CircleBorder(),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(20.0 * animationController!.value),
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(100),
-                      decoration: ShapeDecoration(
-                        color: Colors.white,
-                        shape: CircleBorder(),
-                      ),
-                      child: Image.asset("assets/images/icon.png",width: 200,height: 200,),
-                    ),
-                  ),
-                )
+              alignment: Alignment.center,
+              child: Image.asset("assets/images/upper.png",height: 150,),
             ),
             Align(
-                alignment: Alignment.bottomCenter,
-                child:  Padding(
-                  padding: EdgeInsets.only(bottom: 20),
-                  child: Text("HULACE"),
-                )
-            )
-
-
+              alignment: Alignment.bottomCenter,
+              child: Image.asset("assets/images/lower.png",height: 50,width: 80,),
+            ),
           ],
         )
     );

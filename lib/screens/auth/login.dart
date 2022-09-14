@@ -3,7 +3,10 @@ import 'package:cool_alert/cool_alert.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:hulace/api/firebase_apis.dart';
 import 'package:hulace/screens/auth/register.dart';
+import 'package:hulace/screens/auth/vendor_complete.dart';
+import 'package:hulace/screens/get_started/register_as.dart';
 import 'package:hulace/screens/navigators/vendor_nav.dart';
 import 'package:provider/provider.dart';
 import 'package:sn_progress_dialog/progress_dialog.dart';
@@ -12,6 +15,7 @@ import '../../model/users.dart';
 import '../../provider/UserDataProvider.dart';
 import '../../utils/constants.dart';
 import '../navigators/customer_nav.dart';
+import 'forgot_password.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -27,6 +31,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -44,9 +49,9 @@ class _LoginState extends State<Login> {
                         child: Image.asset("assets/images/icon.png",width: 50,height: 50,),
                       ),
                       SizedBox(height: 10,),
-                      Text("Hello Welcome!",textAlign: TextAlign.center,style: TextStyle(fontSize:22,fontWeight: FontWeight.w400),),
+                      Text("Welcome to Hulace",textAlign: TextAlign.center,style: TextStyle(fontSize:22,fontWeight: FontWeight.w400),),
                       SizedBox(height: 5,),
-                      Text("To Hulace platform",textAlign: TextAlign.center,style: TextStyle(fontSize:14,fontWeight: FontWeight.w300),),
+                      //Text("To Hulace platform",textAlign: TextAlign.center,style: TextStyle(fontSize:14,fontWeight: FontWeight.w300),),
                     ],
                   ),
                 ),
@@ -139,6 +144,7 @@ class _LoginState extends State<Login> {
                         children: [
                           InkWell(
                             onTap: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ForgotPassword()));
 
                             },
                             child: Text("Forgot Password?",style: TextStyle(fontSize:14,fontWeight: FontWeight.w400),),
@@ -151,10 +157,11 @@ class _LoginState extends State<Login> {
                           if(_formKey.currentState!.validate()){
                             final ProgressDialog pr = ProgressDialog(context: context);
                             pr.show(max: 100, msg: 'Logging In');
-                            await FirebaseAuth.instance.signInWithEmailAndPassword(
-                                email: _emailController.text.trim(),
-                                password: _passwordController.text
-                            ).then((value)async{
+                            try{
+                              await FirebaseAuth.instance.signInWithEmailAndPassword(
+                                  email: _emailController.text.trim(),
+                                  password: _passwordController.text
+                              );
                               await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get().then((DocumentSnapshot documentSnapshot) async{
                                 if (documentSnapshot.exists) {
                                   pr.close();
@@ -203,14 +210,19 @@ class _LoginState extends State<Login> {
                                   );
                                 }
                               });
-                            }).onError((error, stackTrace){
+                            }
+
+                            on FirebaseAuthException catch  (e) {
+                              print('Failed with error code: ${e.code}');
+                              print(e.message);
                               pr.close();
                               CoolAlert.show(
                                 context: context,
                                 type: CoolAlertType.error,
-                                text: error.toString(),
+                                text: getMessageFromErrorCode(e.code),
                               );
-                            });
+                            }
+
                           }
                         },
                         child: Container(
@@ -239,6 +251,7 @@ class _LoginState extends State<Login> {
                           Text("Not have an account?",style: TextStyle(fontSize:14,fontWeight: FontWeight.w400),),
                           InkWell(
                             onTap: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => RegisterAs()));
 
                             },
                             child: Text("  Sign Up",style: TextStyle(fontSize:15,fontWeight: FontWeight.w500),),
@@ -254,8 +267,116 @@ class _LoginState extends State<Login> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           InkWell(
-                            onTap: (){
+                            onTap: ()async{
+                              try{
+                                UserCredential _userCredential= await signInWithGoogle();
+                                await FirebaseFirestore.instance.collection('users').doc(_userCredential.user!.uid).get().then((DocumentSnapshot documentSnapshot) async{
+                                  if (documentSnapshot.exists) {
+                                    Map<String, dynamic> data = documentSnapshot.data()! as Map<String, dynamic>;
+                                    UserModel user=UserModel.fromMap(data,documentSnapshot.reference.id);
+                                    if(user.status=="Pending"){
+                                      FirebaseAuth.instance.signOut();
+                                      CoolAlert.show(
+                                        context: context,
+                                        type: CoolAlertType.info,
+                                        text: "Your account is pending for approval from admin",
+                                      );
+                                    }
+                                    else if(user.status=="Blocked"){
+                                      FirebaseAuth.instance.signOut();
+                                      CoolAlert.show(
+                                        context: context,
+                                        type: CoolAlertType.error,
+                                        text: "Your account is blocked by admin",
+                                      );
+                                    }
 
+                                    else if(user.status=="Approved"){
+                                      String? token="";
+                                      FirebaseMessaging _fcm=FirebaseMessaging.instance;
+                                      token=await _fcm.getToken();
+                                      await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update({
+                                        "token":token,
+                                      });
+                                      final provider = Provider.of<UserDataProvider>(context, listen: false);
+                                      provider.setUserData(user);
+                                      print("user type ${user.type}");
+                                      if(user.type=="Customer")
+                                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => CustomerNavBar()));
+                                      else
+                                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => VendorNavBar()));
+
+                                    }
+                                  }
+                                  else{
+                                    String? token="";
+                                    FirebaseMessaging _fcm=FirebaseMessaging.instance;
+                                    token=await _fcm.getToken();
+                                    await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).set({
+                                      "type":"Customer",
+                                      "email":_userCredential.user!.email,
+                                      "password":"",
+                                      "balance":0,
+                                      "status":"Approved",
+                                      "token":token,
+                                      "firstName":_userCredential.user!.displayName,
+                                      "lastName":"",
+                                      "city":"Not Set",
+                                      "location":"Not Set",
+                                      "country":"Not Set",
+                                      "createdAt":DateTime.now().millisecondsSinceEpoch,
+                                      "businessName":"",
+                                      "employeeCount":"",
+                                      "businessCategory":"",
+                                      "ssm":"",
+                                      "profilePic":"",
+                                    });
+                                    final provider = Provider.of<UserDataProvider>(context, listen: false);
+                                    UserModel user=new UserModel.fromMap(
+                                        {
+                                          "type":"Customer",
+                                          "balance":0,
+                                          "email":_userCredential.user!.email,
+                                          "password":"",
+                                          "status":"Approved",
+                                          "token":token,
+                                          "firstName":_userCredential.user!.displayName,
+                                          "lastName":"",
+                                          "city":"Not Set",
+                                          "location":"Not Set",
+                                          "country":"Not Set",
+                                          "favouriteVendors":[],
+                                          "createdAt":DateTime.now().millisecondsSinceEpoch,
+                                          "businessName":"",
+                                          "employeeCount":"",
+                                          "businessCategory":"",
+                                          "ssm":"",
+                                          "profilePic":"",
+                                        },
+                                        FirebaseAuth.instance.currentUser!.uid
+                                    );
+
+
+                                    provider.setUserData(user);
+                                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => CustomerNavBar()));
+                                    /*if(widget.type=="Customer"){
+                                      Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => CustomerNavBar()));
+                                    }
+                                    else{
+                                      Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => CompleteVendorAuth()));
+                                    }*/
+                                  }
+                                });
+                              }
+                              on FirebaseAuthException catch  (e) {
+                                print('Failed with error code: ${e.code}');
+                                print(e.message);
+                                CoolAlert.show(
+                                  context: context,
+                                  type: CoolAlertType.error,
+                                  text: getMessageFromErrorCode(e.code),
+                                );
+                              }
                             },
                             child: Container(
                               width: MediaQuery.of(context).size.width*0.45,

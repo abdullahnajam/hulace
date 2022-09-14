@@ -142,7 +142,7 @@ class _CreatePackageState extends State<CreatePackage> {
                   width: MediaQuery.of(context).size.width,
                   color: secondaryColor,
                   child: photoUrl==""?DottedBorder(
-                      color: primaryColor,
+                      color: Colors.white,
                       strokeWidth: 1,
                       dashPattern: [7],
                       borderType: BorderType.Rect,
@@ -153,9 +153,9 @@ class _CreatePackageState extends State<CreatePackage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Image.asset("assets/images/upload.png",color: primaryColor,height: 50,width: 50,fit: BoxFit.cover,),
+                            Image.asset("assets/images/upload.png",color: Colors.white,height: 50,width: 50,fit: BoxFit.cover,),
                             SizedBox(height: 10,),
-                            Text("Upload Image",style: TextStyle(color: primaryColor,fontWeight: FontWeight.w300),)
+                            Text("Upload Image",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w300),)
                           ],
                         ),
                       )
@@ -348,7 +348,7 @@ class _CreatePackageState extends State<CreatePackage> {
                               borderRadius: BorderRadius.circular(10)
                           ),
                           alignment: Alignment.center,
-                          child: Text("POST"),
+                          child: Text("POST",style: TextStyle(color: Colors.white),),
                         ),
                       )
                     ],

@@ -50,7 +50,7 @@ class _VendorChatState extends State<VendorChat> {
                         onTap: (){
                           _openDrawer();
                         },
-                        child: Image.asset("assets/images/menu.png",color: primaryColor,height: 40,),
+                        child: Image.asset("assets/images/menu.png",color: bgColor,height: 40,),
                       ),
 
 

@@ -3,6 +3,7 @@ import 'package:cool_alert/cool_alert.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hulace/api/payment_service.dart';
 import 'package:hulace/screens/vendor/send_proposal.dart';
 import 'package:hulace/widgets/custom_appbar.dart';
 import 'package:provider/provider.dart';
@@ -207,6 +208,8 @@ class _JobDetailState extends State<JobDetail> {
                         "status":"Active",
                         "createdAt":DateTime.now().millisecondsSinceEpoch,
                       }).then((val)async{
+                        PaymentService payment=PaymentService();
+                        payment.payment(_offeredController.text);
                         pr.close();
                         CoolAlert.show(
                             context: context,

@@ -9,7 +9,7 @@ import '../../model/order_model.dart';
 import '../../model/package_model.dart';
 import '../../model/users.dart';
 import '../../provider/UserDataProvider.dart';
-import '../../utils/apis.dart';
+import '../../api/firebase_apis.dart';
 import '../../utils/constants.dart';
 import '../../widgets/profile_image.dart';
 import 'job_detail.dart';

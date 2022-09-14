@@ -130,7 +130,7 @@ class _VendorProfileState extends State<VendorProfile> {
                         onTap: (){
                           _openDrawer();
                         },
-                        child: Image.asset("assets/images/menu.png",color: primaryColor,height: 40,),
+                        child: Image.asset("assets/images/menu.png",color: bgColor,height: 40,),
                       ),
 
 
@@ -281,13 +281,7 @@ class _VendorProfileState extends State<VendorProfile> {
                                   title: Text("Address",style: TextStyle(fontWeight: FontWeight.w500),),
                                   subtitle: Text(provider.userData!.location,style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w300,fontSize: 13),),
                                 ),
-                                ListTile(
-                                  onTap: (){
-                                  },
-                                  leading: Icon(Icons.person),
-                                  title: Text("Age",style: TextStyle(fontWeight: FontWeight.w500),),
-                                  subtitle: Text(provider.userData!.age,style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w300,fontSize: 13),),
-                                ),
+
                                 ListTile(
                                   onTap: (){
                                   },

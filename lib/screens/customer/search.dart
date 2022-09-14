@@ -6,6 +6,7 @@ import 'package:hulace/model/category_model.dart';
 import 'package:hulace/model/package_model.dart';
 import 'package:hulace/screens/customer/view_vendor.dart';
 
+import '../../api/firebase_apis.dart';
 import '../../model/event_model.dart';
 import '../../model/users.dart';
 import '../../utils/constants.dart';
@@ -26,7 +27,7 @@ class _SearchState extends State<Search> {
   int selectedCategoryIndex=0;
   String selectedCategory="All Categories";
   Future<List<CategoryModel>> getCategories()async{
-    CategoryModel cat=CategoryModel("",'All Categories');
+    CategoryModel cat=CategoryModel("",'All Categories',"",primaryColor.value);
     List<CategoryModel> categories=[cat];
     await FirebaseFirestore.instance.collection('categories').get().then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
@@ -38,22 +39,7 @@ class _SearchState extends State<Search> {
     return categories;
   }
 
-  Future<String> getPackages(userId)async{
-    List<double> prices=[];
-    await FirebaseFirestore.instance.collection('packages').where("userId",isEqualTo:userId).get().then((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
-        Map<String, dynamic> data = doc.data()! as Map<String, dynamic>;
-        PackageModel model=PackageModel.fromMap(data, doc.reference.id);
-        prices.add(double.parse(model.budget));
-      });
-    });
-    print("prices = $prices");
-    prices.sort((a, b) => a.compareTo(b));
-    if(prices.isEmpty)
-      return "No Packages";
-    else
-      return "Starts From RM${prices.first}";
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +50,7 @@ class _SearchState extends State<Search> {
       body: Column(
         children: [
           Container(
-            height: MediaQuery.of(context).size.height*0.28,
+            height: MediaQuery.of(context).size.height*0.22,
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               color: secondaryColor,
@@ -82,7 +68,7 @@ class _SearchState extends State<Search> {
                         onTap: (){
                           _openDrawer();
                         },
-                        child: Image.asset("assets/images/menu.png",color: primaryColor,height: 40,),
+                        child: Image.asset("assets/images/menu.png",color: bgColor,height: 40,),
                       ),
 
 
@@ -188,9 +174,9 @@ class _SearchState extends State<Search> {
               ),
               child: Column(
                 children: [
-
+                  SizedBox(height: 20,),
                   FutureBuilder<List<CategoryModel>>(
-                      future: getCategories(),
+                      future: getServices(),
                       builder: (context, AsyncSnapshot<List<CategoryModel>> snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return Container(

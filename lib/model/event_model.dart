@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 class EventModel{
-  String id,userId,description,image,location,category,status,date,time,city;
+  String id,userId,description,location,category,status,date,time,city,eventCode;
   int createdAt,dateTime,limit;
-  List members;
+  List members,pending,image,services;
   GeoPoint coordinates;
 
 
@@ -12,12 +12,15 @@ class EventModel{
   EventModel.fromMap(Map<String,dynamic> map,String key)
       : id=key,
         description = map['description']??"",
-        image = map['image']??"",
+        image = map['image']??[],
         userId = map['userId']??"",
+        eventCode = map['eventCode']??"",
         location = map['location']??"",
         time = map['time']??"",
         city = map['city']??"",
         members = map['members']??[],
+        pending = map['pending']??[],
+        services = map['services']??[],
         category = map['category']??"Personal",
         status = map['status']??"",
         date = map['date']??"",

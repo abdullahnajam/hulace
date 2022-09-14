@@ -7,8 +7,12 @@ import 'package:hulace/screens/customer/my_order.dart';
 import 'package:hulace/screens/vendor/create_package.dart';
 import 'package:hulace/screens/vendor/my_packages.dart';
 import 'package:hulace/screens/vendor/proposals.dart';
+import 'package:hulace/screens/vendor/vendor_my_events.dart';
 import 'package:hulace/screens/vendor/vprofile.dart';
+import 'package:hulace/widgets/profile_image.dart';
+import 'package:provider/provider.dart';
 
+import '../../provider/UserDataProvider.dart';
 import '../../utils/constants.dart';
 import '../../utils/rate_us.dart';
 import '../customer/my_requests.dart';
@@ -24,6 +28,8 @@ class VendorDrawer extends StatefulWidget {
 class _VendorDrawerState extends State<VendorDrawer> {
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<UserDataProvider>(context, listen: false);
+
     return Drawer(
       child: Column(
         children: [
@@ -39,23 +45,10 @@ class _VendorDrawerState extends State<VendorDrawer> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    margin: EdgeInsets.all(2),
-                    height: 50,
-                    width: 50,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                            image: AssetImage("assets/images/profile.png",),
-                            fit: BoxFit.cover
-                        )
-
-                    ),
-
-                  ),
+                  ProfilePicture(provider.userData!.profilePic),
                   SizedBox(height: 10,),
                   //Text(provider.userData.,style: TextStyle(color: Colors.white,fontSize: 16),),
-                  Text("user@mail.com",style: TextStyle(color: Colors.white,fontSize: 14),),
+                  Text(provider.userData!.email,style: TextStyle(color: Colors.white,fontSize: 14),),
                 ],
               ),
             ),
@@ -87,12 +80,12 @@ class _VendorDrawerState extends State<VendorDrawer> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Create A Package",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
+                            Text("Create A Package",style: TextStyle(color:Colors.white,fontSize: 16,fontWeight: FontWeight.w500),),
                             SizedBox(height: 3,),
-                            Text("6/6/2022",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w300),),
+                            Text("6/6/2022",style: TextStyle(color:Colors.white,fontSize: 12,fontWeight: FontWeight.w300),),
                           ],
                         ),
-                        Icon(Icons.keyboard_arrow_right,color: Colors.grey[700],)
+                        Icon(Icons.keyboard_arrow_right,color: Colors.white,)
                       ],
                     ),
                   ),
@@ -136,7 +129,14 @@ class _VendorDrawerState extends State<VendorDrawer> {
                   leading: Icon(Icons.assignment),
                   title: Text("My Packages"),
                 ),
+                ListTile(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => VendorMyEvents()));
 
+                  },
+                  leading: Icon(Icons.calendar_today),
+                  title: Text("My Events"),
+                ),
                 ListTile(
                   onTap: (){
                     Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => Proposals()));

@@ -56,7 +56,7 @@ class _MyPackagesState extends State<MyPackages> {
                         onTap: (){
                           _openDrawer();
                         },
-                        child: Image.asset("assets/images/menu.png",color: primaryColor,height: 40,),
+                        child: Image.asset("assets/images/menu.png",color: bgColor,height: 40,),
                       ),
                     ],
                   ),

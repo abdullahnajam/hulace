@@ -8,7 +8,7 @@ import 'package:hulace/screens/vendor/vendor_order_detail.dart';
 import '../../model/order_model.dart';
 import '../../model/package_model.dart';
 import '../../model/users.dart';
-import '../../utils/apis.dart';
+import '../../api/firebase_apis.dart';
 import '../../utils/constants.dart';
 import '../../widgets/profile_image.dart';
 import '../customer/order_detail.dart';
@@ -62,7 +62,7 @@ class _OrdersState extends State<Orders> {
                         onTap: (){
                           _openDrawer();
                         },
-                        child: Image.asset("assets/images/menu.png",color: primaryColor,height: 40,),
+                        child: Image.asset("assets/images/menu.png",color: Colors.white,height: 40,),
                       ),
                     ],
                   ),
@@ -90,7 +90,7 @@ class _OrdersState extends State<Orders> {
                               bottomLeft:Radius.circular(10),
                             )*/
                           ),
-                          child: Icon(Icons.search,color: secondaryColor,),
+                          child: Icon(Icons.search,color: Colors.white,),
                         ),
                         Expanded(
                           child: TextFormField(

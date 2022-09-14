@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:fluttericon/linecons_icons.dart';
+import 'package:hulace/screens/customer/create_event.dart';
 import 'package:hulace/screens/customer/customer_homepage.dart';
 import 'package:hulace/screens/customer/customer_profile.dart';
 import 'package:hulace/screens/customer/search.dart';
@@ -29,6 +30,7 @@ class _BottomNavigationState extends State<CustomerNavBar>{
     _children = [
       CustomerHomepage(),
       Search(),
+      CreateEvent(),
       ChatList(),
       CustomerProfile(),
 
@@ -64,8 +66,8 @@ class _BottomNavigationState extends State<CustomerNavBar>{
         shape: bottomBarShape,
         padding: EdgeInsets.all(0),
 
-        snakeViewColor: primaryColor,
-        selectedItemColor: SnakeShape.circle == SnakeShape.indicator ? bgColor : null,
+        snakeViewColor: Colors.white,
+        selectedItemColor: SnakeShape.circle == SnakeShape.indicator ? bgColor : primaryColor,
         unselectedItemColor: Colors.white,
 
         currentIndex: _currentIndex,
@@ -73,6 +75,7 @@ class _BottomNavigationState extends State<CustomerNavBar>{
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.cabin), label: 'tickets'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'calendar'),
+          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'event'),
           BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'home'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'mic'),
         ],

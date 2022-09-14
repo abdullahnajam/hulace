@@ -8,6 +8,7 @@ import 'package:hulace/screens/vendor/orders.dart';
 import 'package:hulace/screens/vendor/proposals.dart';
 import 'package:hulace/screens/vendor/vendor_alerts.dart';
 import 'package:hulace/screens/vendor/vendor_chat.dart';
+import 'package:hulace/screens/vendor/vendor_events.dart';
 import 'package:hulace/screens/vendor/vendor_profile.dart';
 import 'package:hulace/utils/constants.dart';
 
@@ -33,8 +34,9 @@ class _VendorNavBarState extends State<VendorNavBar> {
   void initState() {
     super.initState();
     _children = [
-      Jobs(),
+      VendorEvents(),
       Orders(),
+      Jobs(),
       ChatList(),
       VendorProfile()
 
@@ -69,8 +71,8 @@ class _VendorNavBarState extends State<VendorNavBar> {
         shape: bottomBarShape,
         padding: EdgeInsets.all(0),
 
-        snakeViewColor: primaryColor,
-        selectedItemColor: SnakeShape.circle == SnakeShape.indicator ? bgColor : null,
+        snakeViewColor: Colors.white,
+        selectedItemColor: SnakeShape.circle == SnakeShape.indicator ? bgColor : primaryColor,
         unselectedItemColor: Colors.white,
 
         currentIndex: _currentIndex,
@@ -78,6 +80,7 @@ class _VendorNavBarState extends State<VendorNavBar> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.cabin), label: 'tickets'),
           BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_outlined), label: 'calendar'),
+          BottomNavigationBarItem(icon: Icon(Icons.wallet_travel), label: 'jobs'),
           BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'home'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'mic'),
         ],

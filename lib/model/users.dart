@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 class UserModel{
   String userId,email,password,status,token,type;
-  String firstName,lastName,city,country,location,profilePic,age;
+  String firstName,lastName,city,country,location,profilePic;
   int createdAt,balance;
+  List favouriteVendors;
 
   String businessName,employeeCount,ssm,businessCategory;
 
@@ -20,8 +21,8 @@ class UserModel{
         country = map['country']??"",
         location = map['location']??"",
         profilePic = map['profilePic']??"",
-        age = map['age']??"",
         balance = map['balance']??0,
+        favouriteVendors = map['favouriteVendors']??[],
         createdAt = map['createdAt']??DateTime.now().millisecondsSinceEpoch,
         businessName = map['businessName']??"",
         employeeCount = map['employeeCount']??"",

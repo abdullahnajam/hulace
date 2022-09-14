@@ -27,6 +27,8 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+
+
   var _firstNameController=TextEditingController();
   var _lastNameController=TextEditingController();
   var _emailController=TextEditingController();
@@ -236,46 +238,7 @@ class _RegisterState extends State<Register> {
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                         ),
                       ),
-                      SizedBox(height: 20,),
-                      TextFormField(
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter some text';
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.number,
-                        controller: _ageController,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.all(15),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.0),
-                            borderSide: BorderSide(
-                              color: Colors.transparent,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.0),
-                            borderSide: BorderSide(
-                                color: Colors.transparent,
-                                width: 0.5
-                            ),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7.0),
-                            borderSide: BorderSide(
-                              color: Colors.transparent,
-                              width: 0.5,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                          hintText: 'Enter Age',
-                          // If  you are using latest version of flutter then lable text and hint text shown like this
-                          // if you r using flutter less then 1.20.* then maybe this is not working properly
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                        ),
-                      ),
+
                       SizedBox(height: 20,),
                       TextFormField(
                         validator: (value) {
@@ -353,14 +316,15 @@ class _RegisterState extends State<Register> {
                           if(_formKey.currentState!.validate()){
                             final ProgressDialog pr = ProgressDialog(context: context);
                             pr.show(max: 100, msg: 'Please Wait');
-                            await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                              email: _emailController.text.trim(),
-                              password: _passwordController.text,
-                            ).then((value)async{
+                            try{
+                              await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text,
+                              );
                               String? token="";
                               FirebaseMessaging _fcm=FirebaseMessaging.instance;
                               token=await _fcm.getToken();
-                              await FirebaseFirestore.instance.collection('users').doc(value.user!.uid).set({
+                              await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).set({
                                 "type":widget.type,
                                 "email":_emailController.text,
                                 "password":_passwordController.text,
@@ -372,7 +336,6 @@ class _RegisterState extends State<Register> {
                                 "city":city,
                                 "location":_locationController.text,
                                 "country":country,
-                                "age":_ageController.text,
                                 "createdAt":DateTime.now().millisecondsSinceEpoch,
                                 "businessName":"",
                                 "employeeCount":"",
@@ -395,7 +358,7 @@ class _RegisterState extends State<Register> {
                                       "city":city,
                                       "location":_locationController.text,
                                       "country":country,
-                                      "age":_ageController.text,
+                                      "favouriteVendors":[],
                                       "createdAt":DateTime.now().millisecondsSinceEpoch,
                                       "businessName":"",
                                       "employeeCount":"",
@@ -403,9 +366,9 @@ class _RegisterState extends State<Register> {
                                       "ssm":"",
                                       "profilePic":"",
                                     },
-                                    value.user!.uid
+                                    FirebaseAuth.instance.currentUser!.uid
                                 );
-                                
+
 
                                 provider.setUserData(user);
                                 if(widget.type=="Customer"){
@@ -426,14 +389,17 @@ class _RegisterState extends State<Register> {
                                   text: error.toString(),
                                 );
                               });
-                            }).onError((error, stackTrace){
+                            }
+                            on FirebaseAuthException catch  (e) {
+                              print('Failed with error code: ${e.code}');
+                              print(e.message);
                               pr.close();
                               CoolAlert.show(
                                 context: context,
                                 type: CoolAlertType.error,
-                                text: error.toString(),
+                                text: getMessageFromErrorCode(e.code),
                               );
-                            });
+                            }
                           }
                          
                         },

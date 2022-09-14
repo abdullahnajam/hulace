@@ -14,7 +14,7 @@ import 'package:sn_progress_dialog/progress_dialog.dart';
 
 import '../../model/package_model.dart';
 import '../../model/users.dart';
-import '../../utils/apis.dart';
+import '../../api/firebase_apis.dart';
 import '../chat_screen.dart';
 
 class OrderDetail extends StatefulWidget {
@@ -170,11 +170,11 @@ class _OrderDetailState extends State<OrderDetail> {
                                       "vendorId":widget.order.vendorId,
                                     }).then((value){
                                       if(widget.type=="Vendor"){
-                                        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ChatScreen("Vendor",widget.order.customerId,"${widget.order.customerId}-${widget.order.vendorId}")));
+                                        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ChatScreen("Vendor",widget.order.customerId)));
 
                                       }
                                       else{
-                                        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ChatScreen("Customer",widget.order.vendorId,"${widget.order.customerId}-${widget.order.vendorId}")));
+                                        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => ChatScreen("Customer",widget.order.vendorId)));
 
                                       }
                                     }).onError((error, stackTrace){
@@ -267,11 +267,42 @@ class _OrderDetailState extends State<OrderDetail> {
                     Container(
                       child: Row(
                         children: [
+                          if(widget.order.status=="In Progress")
                           Expanded(
                             flex: 1,
                             child: InkWell(
-                              onTap: (){
+                              onTap: ()async{
+                                CoolAlert.show(
+                                    context: context,
+                                    type: CoolAlertType.confirm,
+                                    text: "Are you sure you want to cancel the order?",
+                                    onConfirmBtnTap: ()async{
 
+                                      Navigator.pop(context);
+                                      await FirebaseFirestore.instance.collection('orders').doc(widget.order.id).update({
+                                        "status":"Cancelled",
+
+                                      }).then((val)async{
+                                        CoolAlert.show(
+                                            context: context,
+                                            type: CoolAlertType.success,
+                                            text: "Order Cancelled",
+                                            onConfirmBtnTap: (){
+                                              Navigator.pop(context);
+                                              Navigator.pop(context);
+                                            }
+                                        );
+                                      }).onError((error, stackTrace){
+                                        Navigator.pop(context);
+                                        CoolAlert.show(
+                                          context: context,
+                                          type: CoolAlertType.error,
+                                          text: error.toString(),
+                                        );
+                                      });
+
+                                    }
+                                );
                               },
                               child: Container(
                                 padding: EdgeInsets.all(10),
@@ -292,11 +323,42 @@ class _OrderDetailState extends State<OrderDetail> {
                               ),
                             ),
                           ),
+                          if(widget.order.status=="In Progress")
                           Expanded(
                             flex: 1,
                             child: InkWell(
-                              onTap: (){
+                              onTap: ()async{
+                                CoolAlert.show(
+                                    context: context,
+                                    type: CoolAlertType.confirm,
+                                    text: "Are you sure you want to complete the order?",
+                                    onConfirmBtnTap: ()async{
 
+                                      Navigator.pop(context);
+                                      await FirebaseFirestore.instance.collection('orders').doc(widget.order.id).update({
+                                        "status":"Completed",
+
+                                      }).then((val)async{
+                                        CoolAlert.show(
+                                            context: context,
+                                            type: CoolAlertType.success,
+                                            text: "Order Completed",
+                                            onConfirmBtnTap: (){
+                                              Navigator.pop(context);
+                                              Navigator.pop(context);
+                                            }
+                                        );
+                                      }).onError((error, stackTrace){
+                                        Navigator.pop(context);
+                                        CoolAlert.show(
+                                          context: context,
+                                          type: CoolAlertType.error,
+                                          text: error.toString(),
+                                        );
+                                      });
+
+                                    }
+                                );
                               },
                               child: Container(
                                 padding: EdgeInsets.all(10),
@@ -317,6 +379,7 @@ class _OrderDetailState extends State<OrderDetail> {
                               ),
                             ),
                           ),
+
                           Expanded(
                             flex: 1,
                             child: InkWell(

@@ -26,10 +26,10 @@ class _IntroScreenState extends State<IntroScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const bodyStyle = TextStyle(fontSize:15,fontWeight: FontWeight.w300,);
+    const bodyStyle = TextStyle(fontSize:15,fontWeight: FontWeight.w300,color: whiteColor);
 
     const pageDecoration = const PageDecoration(
-      titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
+      titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.w700,color: whiteColor),
       bodyTextStyle: bodyStyle,
       bodyPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
       pageColor: primaryColor,
@@ -49,6 +49,7 @@ class _IntroScreenState extends State<IntroScreen> {
           decoration: pageDecoration,
         ),
         PageViewModel(
+
           title: "Instantly chat with vendors\nand book events.",
           body: "Lorem ipsum dolor sit amet, consectetur\nadipiscing elit leo felis congue elit leo.",
           image: Image.asset("assets/images/onboard2.png"),
@@ -82,7 +83,7 @@ class _IntroScreenState extends State<IntroScreen> {
         ),
       ),
       dotsContainerDecorator: const ShapeDecoration(
-        color: Colors.black87,
+        color: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
